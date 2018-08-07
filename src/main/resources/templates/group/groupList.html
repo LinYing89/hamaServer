@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet"
+	href="/webjars/bootstrap/4.1.3/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css"
+	href="/css/my-list-group-item.css">
+<title>组列表</title>
+</head>
+<body>
+	<div th:replace="fragments/header :: header('',${user.name})">header</div>
+	<br>
+
+	<div class="container">
+
+		<div class="list-group">
+			<a href="#"
+				class="list-group-item list-group-item-action flex-column align-items-start"
+				th:each="devGroup : ${user.listDevGroup}"
+				th:href="@{/group/{groupId}(groupId=${devGroup.id})}">
+				<div class="d-flex w-100 justify-content-between">
+					<span class="mb-1" th:text="${devGroup.name}">组名</span>
+					<div class="btn-group btn-group-sm" role="group">
+						<button type="button" th:title="${devGroup.id}"
+							class="btn btn-light btnEdit">编辑</button>
+						<button type="button" th:title="${devGroup.id}"
+							class="btn btn-light btnDel">删除</button>
+					</div>
+				</div>
+			</a>
+		</div>
+		<a class="btn btn-primary btn-block" href="#" role="button"
+			th:href="@{/group/register}">添加组</a>
+	</div>
+
+	<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog"
+		aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">删除组</h5>
+					<h5 id="groupId"></h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">这个组将被删除，并且无法恢复。您确定吗？</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">取消</button>
+					<button id="btnModalDelGroup" type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div th:replace="fragments/footer :: footer">footer</div>
+
+	<script src="/webjars/jquery/3.3.1/jquery.min.js"></script>
+	<script src="/webjars/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+	<script src="/webjars/popper.js/1.14.3/umd/popper.min.js"></script>
+	<script src="/js/groupList.js"></script>
+</body>
+</html>
