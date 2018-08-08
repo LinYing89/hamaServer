@@ -7,6 +7,7 @@
 .factorypath
 .project
 .settings
+.logs
 .springBeans
 .sts4-cache
 
@@ -23,3 +24,4 @@
 /dist/
 /nbdist/
 /.nb-gradle/
+/logs/
