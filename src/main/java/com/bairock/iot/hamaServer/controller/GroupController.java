@@ -63,7 +63,7 @@ public class GroupController {
     public String showGroup(@PathVariable long groupId, Model model) {
         User user = (User) model.asMap().get("user");
         DevGroup group = user.findDevGroupById(groupId);
-        model.addAttribute("group", group);
+        model.addAttribute("devGroup", group);
         return "group/group";
     }
 }

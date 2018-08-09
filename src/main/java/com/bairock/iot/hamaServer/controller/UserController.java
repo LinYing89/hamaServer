@@ -9,13 +9,17 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.bairock.iot.hamaServer.data.RegisterUserHelper;
+import com.bairock.iot.hamaServer.data.Result;
 import com.bairock.iot.hamaServer.data.Untils;
 import com.bairock.iot.hamaServer.repository.UserRepository;
+import com.bairock.iot.hamaServer.service.UserService;
 import com.bairock.iot.intelDev.user.User;
 
 @Controller
@@ -25,6 +29,9 @@ public class UserController {
 
 	@Autowired
     private UserRepository userRepository;
+	
+	@Autowired
+	private UserService userService;
 
     //打开注册页面
     @GetMapping("/register")
@@ -121,5 +128,16 @@ public class UserController {
         httpServletResponse.addCookie(userCookie);
         model.addAttribute("registerUserHelper", new RegisterUserHelper());
         return "login";
+    }
+    
+    /**
+     * 用户数据上传
+     * @param user
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/userUpload")
+    public Result<Object> userUpload(@RequestBody User user) throws Exception{
+    	return userService.userUpload(user);
     }
 }
