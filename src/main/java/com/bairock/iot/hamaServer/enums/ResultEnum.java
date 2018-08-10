@@ -4,7 +4,8 @@ public enum ResultEnum {
 
 	UBKNOW_ERROR(-1, "未知错误"),
 	SUCCESS(0, "成功"),
-	USER_UPLOAD_NULL(1, "上传的用户信息对象为null")
+	USER_UPLOAD_NULL(1, "上传的用户信息对象为null"),
+	DEVGROUP_UPLOAD_NULL(2, "上传的组信息对象为null")
 	;
 	
 	private int code;
