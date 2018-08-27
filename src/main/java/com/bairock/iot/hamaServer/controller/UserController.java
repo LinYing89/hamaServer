@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -139,5 +140,16 @@ public class UserController {
     @PostMapping("/userUpload")
     public Result<Object> userUpload(@RequestBody User user) throws Exception{
     	return userService.userUpload(user);
+    }
+    
+    /**
+     * 用户数据下载
+     * @param user
+     * @return
+     */
+    @ResponseBody
+    @GetMapping("/userDownload/{userName}")
+    public Result<User> userDownload(@PathVariable String userName) throws Exception{
+    	return userService.userDownload(userName);
     }
 }

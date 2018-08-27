@@ -8,9 +8,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
+import com.bairock.iot.hamaServer.data.DevGroupLoginResult;
 import com.bairock.iot.hamaServer.data.RegisterUserHelper;
+import com.bairock.iot.hamaServer.data.Result;
 import com.bairock.iot.hamaServer.service.DevGroupService;
 import com.bairock.iot.intelDev.user.DevGroup;
 import com.bairock.iot.intelDev.user.User;
@@ -65,5 +68,12 @@ public class GroupController {
         DevGroup group = user.findDevGroupById(groupId);
         model.addAttribute("devGroup", group);
         return "group/group";
+    }
+    
+    //客户端组登录
+    @ResponseBody
+    @GetMapping("/devGroupLogin/{userName}/{groupName}/{groupPsd}")
+    public Result<DevGroupLoginResult> devGroupLogin(@PathVariable String userName, @PathVariable String groupName, @PathVariable String groupPsd, Model model) throws Exception{
+    	return devGroupService.devGroupLogin(userName, groupName, groupPsd);
     }
 }

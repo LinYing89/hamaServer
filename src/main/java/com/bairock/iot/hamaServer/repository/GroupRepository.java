@@ -14,4 +14,13 @@ public interface GroupRepository extends JpaRepository<DevGroup, Long> {
 	 * @return 设备组集合
 	 */
     List<DevGroup> findByUserId(long userId);
+    
+    /**
+     * 根据组名,组密码和用户id查找设备组
+     * @param name 组名
+     * @param psd 组密码
+     * @param userId 用户id
+     * @return
+     */
+    DevGroup findByNameAndPsdAndUserId(String name, String psd, long userId);
 }

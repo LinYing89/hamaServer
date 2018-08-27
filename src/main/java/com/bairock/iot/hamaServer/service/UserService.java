@@ -26,9 +26,12 @@ public class UserService {
 		if(null == user) {
 			throw new UserException(ResultEnum.USER_UPLOAD_NULL);
 		}
+		if(user.getListDevGroup().size() == 0) {
+			throw new UserException(ResultEnum.DEVGROUP_UPLOAD_NULL);
+		}
 		User userDb = userRepository.findByName(user.getName());
 		if(null == userDb) {
-			throw new UserException(ResultEnum.USER_UPLOAD_NULL);
+			throw new UserException(ResultEnum.USER_NAME_DB_NULL);
 		}
 		DevGroup devGroup = user.getListDevGroup().get(0);
 		DevGroup devGroupDb = userDb.findDevGroupByName(devGroup.getName());
@@ -41,5 +44,22 @@ public class UserService {
 		userDb.addGroup(devGroup);
 		userRepository.save(userDb); 
 		return ResultUtil.success();
+	}
+	
+	/**
+	 * 下载用户信息
+	 * @param name 下载的用户的用户名
+	 * @return Result对象
+	 * @throws Exception 下载异常信息
+	 */
+	public Result<User> userDownload(String name) throws Exception {
+		User user = userRepository.findByName(name);
+		Result<User> r = new Result<>();
+		if(null == user) {
+			throw new UserException(ResultEnum.USER_NAME_DB_NULL);
+		}
+		r.setCode(ResultEnum.SUCCESS.getCode());
+		r.setData(user);
+		return r;
 	}
 }

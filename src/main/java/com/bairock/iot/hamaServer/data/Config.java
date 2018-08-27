@@ -12,7 +12,8 @@ public class Config {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
 
-    private int devicePort = 20000;
+    private int padPort = 20000;
+    private int devicePort = 20001;
     private String serverIp = "127.0.0.1";
     private int webSocketPort = 80;
 
@@ -22,7 +23,14 @@ public class Config {
     public void setId(Long id) {
         this.id = id;
     }
-    public int getDevicePort() {
+    
+    public int getPadPort() {
+		return padPort;
+	}
+	public void setPadPort(int padPort) {
+		this.padPort = padPort;
+	}
+	public int getDevicePort() {
         return devicePort;
     }
     public void setDevicePort(int devicePort) {

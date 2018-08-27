@@ -6,7 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
+import com.bairock.iot.hamaServer.data.Config;
+import com.bairock.iot.hamaServer.data.DevGroupLoginResult;
 import com.bairock.iot.hamaServer.data.RegisterUserHelper;
+import com.bairock.iot.hamaServer.data.Result;
+import com.bairock.iot.hamaServer.enums.ResultEnum;
+import com.bairock.iot.hamaServer.exception.UserException;
 import com.bairock.iot.hamaServer.repository.GroupRepository;
 import com.bairock.iot.hamaServer.repository.UserRepository;
 import com.bairock.iot.intelDev.user.DevGroup;
@@ -19,6 +24,9 @@ public class DevGroupService {
 	private GroupRepository groupRepository;
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private Config config;
 
 	/**
 	 * 注册或编辑组页面提交
@@ -116,5 +124,30 @@ public class DevGroupService {
 		user.removeGroup(devGroupDb);
 		groupRepository.delete(devGroupDb);
 		return true;
+	}
+	
+	/**
+	 * 客户端组登录
+	 * @param userName 用户名
+	 * @param devGroupName 组名
+	 * @param devGroupPsg 组密码
+	 */
+	public Result<DevGroupLoginResult> devGroupLogin(String userName, String devGroupName, String devGroupPsg) throws Exception{
+		User user = userRepository.findByName(userName);
+		if(null == user) {
+			throw new UserException(ResultEnum.USER_NAME_DB_NULL);
+		}
+		DevGroup group = groupRepository.findByNameAndPsdAndUserId(devGroupName, devGroupPsg, user.getId());
+		if(null == group) {
+			throw new UserException(ResultEnum.DEVGROUP_NULL);
+		}
+		Result<DevGroupLoginResult> result = new Result<DevGroupLoginResult>();
+		result.setCode(0);
+		DevGroupLoginResult r = new DevGroupLoginResult();
+		r.setDevGroupPetName(group.getPetName());
+		r.setPadPort(config.getPadPort());
+		r.setDevPort(config.getDevicePort());
+		result.setData(r);
+		return result;
 	}
 }
