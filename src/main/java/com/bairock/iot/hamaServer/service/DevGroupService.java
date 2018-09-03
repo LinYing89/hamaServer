@@ -144,10 +144,33 @@ public class DevGroupService {
 		Result<DevGroupLoginResult> result = new Result<DevGroupLoginResult>();
 		result.setCode(0);
 		DevGroupLoginResult r = new DevGroupLoginResult();
+		r.setDevGroupId(group.getId());
 		r.setDevGroupPetName(group.getPetName());
 		r.setPadPort(config.getPadPort());
 		r.setDevPort(config.getDevicePort());
 		result.setData(r);
 		return result;
+	}
+	
+	/**
+	 * 根据用户名和组名获取组
+	 * @param userName 用户名
+	 * @param devGroupName 组名
+	 * @return
+	 * @throws Exception
+	 */
+	public Result<DevGroup> groupDownload(String userName, String devGroupName) throws Exception {
+		User user = userRepository.findByName(userName);
+		if(null == user) {
+			throw new UserException(ResultEnum.USER_NAME_DB_NULL);
+		}
+		DevGroup group = groupRepository.findByNameAndUserId(devGroupName, user.getId());
+		if(null == group) {
+			throw new UserException(ResultEnum.DEVGROUP_NULL);
+		}
+		Result<DevGroup> r = new Result<>();
+		r.setCode(ResultEnum.SUCCESS.getCode());
+		r.setData(group);
+		return r;
 	}
 }

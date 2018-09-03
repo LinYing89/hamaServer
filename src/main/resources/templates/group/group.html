@@ -43,23 +43,26 @@
 					</thead>
 					<tbody>
 
-						<tr th:each="dev : ${listDevice}" id="'tr_'+${dev.longCoding}">
+						<tr th:each="dev : ${listDevState}" 
+							th:id="'tr-'+${dev.longCoding}">
 							<td th:text="${dev.name}">设备名</td>
 							<td>
 								<div class="btn-group btn-group-sm" role="group">
-									<button id="'btnOn'+${dev.longCoding}"
-										title="${dev.longCoding}" type="button"
+									<button th:id="'btnOn-'+${dev.longCoding}" 
+										th:data-long-coding="${dev.longCoding}"
+										type="button"
 										class="btn btn-outline-secondary btn-on-dev active">开</button>
-									<button id="'btnAuto'+${dev.longCoding}"
-										title="${dev.longCoding}" type="button"
+									<button th:id="'btnAuto-'+${dev.longCoding}" 
+										th:data-long-coding="${dev.longCoding}"
+										type="button"
 										class="btn btn-outline-secondary btn-auto-dev">自动</button>
-									<button id="'btnOff'+${dev.longCoding}"
-										title="${dev.longCoding}" type="button"
+									<button th:id="'btnOff-'+${dev.longCoding}" 
+										th:data-long-coding="${dev.longCoding}"
+										type="button"
 										class="btn btn-outline-secondary btn-off-dev">关</button>
 								</div>
 							</td>
-							<td id="'cm_'+${dev.longCoding}">远程</td>
-							<td><a class="link dev" href="#" title="${dev.longCoding}">
+							<td><a class="link dev" href="#" th:data-long-coding="${dev.longCoding}">
 									<span data-feather="bar-chart"></span>
 							</a></td>
 						</tr>
@@ -77,7 +80,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr th:each="dev : ${listClimate}" id="'tr_'+${dev.longCoding}">
+						<tr th:each="dev : ${listDevCollect}" id="'tr_'+${dev.longCoding}">
 							<td th:text="${dev.name}">温度</td>
 							<td id="'tdValue_'+${dev.longCoding}"
 								th:text="${dev.collectProperty.valueWithSymbol}">26℃</td>
@@ -118,6 +121,11 @@
 	<script>
 		feather.replace()
 	</script>
+
+	<script src="/webjars/sockjs-client/1.1.2/sockjs.min.js"></script>
+	<script src="/webjars/stomp-websocket/2.3.3/stomp.min.js"></script>
+
+	<script src="/js/group.js"></script>
 </body>
 
 </html>

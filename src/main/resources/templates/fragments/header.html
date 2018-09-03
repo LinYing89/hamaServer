@@ -12,12 +12,14 @@
 	<nav
 		class="navbar navbar-expand-lg flex-md-nowrap p-1 navbar-dark bg-dark shadow"
 		th:fragment="header(groupName, userName)">
-		<a class="navbar-brand ml-2" href="#">首页</a> <span class="navbar-text mr-auto"
-			th:text="'组: '+${groupName}"> 组名 </span>
+		<a class="navbar-brand ml-2" href="#">首页</a> 
+		<span class="navbar-text mr-auto"> 组:<span id="span_groupName" th:text="${groupName}">组名</span></span>
+			
 		<ul class="navbar-nav my-2 my-lg-0 mr-3">
 			<li class="nav-item dropdown"
 				th:if="${!#strings.isEmpty(userName)}"><a
-				class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+				id="a_userName" 
+				class="nav-link dropdown-toggle" href="#"
 				role="button" data-toggle="dropdown" aria-haspopup="true"
 				aria-expanded="false" th:text="${userName}"> Dropdown </a>
 				<div class="dropdown-menu" aria-labelledby="navbarDropdown">

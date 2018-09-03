@@ -1,5 +1,7 @@
 package com.bairock.iot.hamaServer.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +17,8 @@ import com.bairock.iot.hamaServer.data.DevGroupLoginResult;
 import com.bairock.iot.hamaServer.data.RegisterUserHelper;
 import com.bairock.iot.hamaServer.data.Result;
 import com.bairock.iot.hamaServer.service.DevGroupService;
+import com.bairock.iot.intelDev.device.Device;
+import com.bairock.iot.intelDev.device.devcollect.DevCollect;
 import com.bairock.iot.intelDev.user.DevGroup;
 import com.bairock.iot.intelDev.user.User;
 
@@ -66,7 +70,11 @@ public class GroupController {
     public String showGroup(@PathVariable long groupId, Model model) {
         User user = (User) model.asMap().get("user");
         DevGroup group = user.findDevGroupById(groupId);
+        List<Device> listDevState = group.findListIStateDev(true);
+        List<DevCollect> listDevCollect = group.findListCollectDev(true);
         model.addAttribute("devGroup", group);
+        model.addAttribute("listDevState", listDevState);
+        model.addAttribute("listDevCollect", listDevCollect);
         return "group/group";
     }
     
@@ -75,5 +83,11 @@ public class GroupController {
     @GetMapping("/devGroupLogin/{userName}/{groupName}/{groupPsd}")
     public Result<DevGroupLoginResult> devGroupLogin(@PathVariable String userName, @PathVariable String groupName, @PathVariable String groupPsd, Model model) throws Exception{
     	return devGroupService.devGroupLogin(userName, groupName, groupPsd);
+    }
+    
+    @ResponseBody
+    @GetMapping("/groupDownload/{userName}/{groupName}")
+    public Result<DevGroup> userDownload(@PathVariable String userName, @PathVariable String groupName) throws Exception{
+    	return devGroupService.groupDownload(userName, groupName);
     }
 }

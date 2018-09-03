@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 public class HamaServerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(HamaServerApplication.class, args);
+		SpringApplication springApplication = new SpringApplication(HamaServerApplication.class);
+        springApplication.run(args);
 	}
 }

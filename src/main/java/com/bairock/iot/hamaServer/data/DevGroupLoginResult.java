@@ -7,10 +7,17 @@ package com.bairock.iot.hamaServer.data;
  */
 public class DevGroupLoginResult {
 
+	private long devGroupId;
 	private String devGroupPetName;
 	private int padPort;
 	private int devPort;
 	
+	public long getDevGroupId() {
+		return devGroupId;
+	}
+	public void setDevGroupId(long devGroupId) {
+		this.devGroupId = devGroupId;
+	}
 	public String getDevGroupPetName() {
 		return devGroupPetName;
 	}

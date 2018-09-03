@@ -23,4 +23,12 @@ public interface GroupRepository extends JpaRepository<DevGroup, Long> {
      * @return
      */
     DevGroup findByNameAndPsdAndUserId(String name, String psd, long userId);
+    
+    /**
+     * 根据组名和用户id查找组
+     * @param name
+     * @param userId
+     * @return
+     */
+    DevGroup findByNameAndUserId(String name, long userId);
 }
