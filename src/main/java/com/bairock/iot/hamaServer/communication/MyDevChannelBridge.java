@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.bairock.iot.hamaServer.SpringUtil;
 import com.bairock.iot.hamaServer.repository.UserRepository;
+import com.bairock.iot.hamaServer.service.DeviceService;
 import com.bairock.iot.intelDev.communication.DevChannelBridge;
 import com.bairock.iot.intelDev.communication.DevChannelBridgeHelper;
 import com.bairock.iot.intelDev.communication.MessageAnalysiser;
@@ -132,8 +133,8 @@ public class MyDevChannelBridge extends DevChannelBridge {
 				dev.setCtrlModel(CtrlModel.UNKNOW);
 				dev.setDevStateId(DevStateHelper.DS_YI_CHANG);
 				setDevice(dev);
-				//设置状态改变监听器
-				dev.setOnStateChanged(new MyOnStateChangedListener());
+				//设置设备监听器
+				DeviceService.setDeviceListener(dev);
 				sendOrder(dev.createInitOrder());
 				setDeviceToZhangChang(dev);
 				if (null != state) {

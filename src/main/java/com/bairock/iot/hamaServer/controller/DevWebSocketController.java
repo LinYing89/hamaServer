@@ -13,6 +13,11 @@ import com.bairock.iot.hamaServer.data.webData.WebUserInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * 组的设备页面websocket controller
+ * @author 44489
+ *
+ */
 @Controller
 public class DevWebSocketController {
 

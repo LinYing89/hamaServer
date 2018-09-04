@@ -9,6 +9,23 @@ $(document).ready(function() {
 	// 初始化webSocket
 	initWebSocket();
 
+	$("tr").each(function(){
+		var stateId = $(this).attr("data-state");
+		console.info(stateId);
+		switch(stateId){
+		case "ds_g" :
+			$(this).attr("class", "")
+			break;
+		case "ds_k" :
+			$(this).attr("class", "table-success")
+			break;
+		case "ds_yc" :
+			$(this).attr("class", "table-danger")
+			break;
+		}
+	});
+	
+	
 	// 开按钮
 	$('.btn-on-dev').click(function() {
 		ctrlClick(this.getAttribute("data-long-coding"), 1);
@@ -61,14 +78,17 @@ function handlerDevState(message) {
 	var state = devState.state;
 	switch (state) {
 	case 0:
-		tr.removeClass("table-success");
+		tr.attr("class", "")
+		//tr.removeClass("table-success");
 		break;
 	case 1:
-		tr.addClass("table-success");
+		tr.attr("class", "table-success")
+		//tr.addClass("table-success");
 		break;
 	case 4:
-		tr.removeClass("table-success");
-		tr.addClass("table-danger");
+		tr.attr("class", "table-danger")
+//		tr.removeClass("table-success");
+//		tr.addClass("table-danger");
 		break;
 	}
 }

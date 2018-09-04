@@ -7,25 +7,10 @@ package com.bairock.iot.hamaServer.data.webData;
  */
 public class WebCtrlDev {
 
-	private String userName;
-	private String devGroupName;
-	
 	private String longCoding;
 	//动作, 1开, 0关, 2停
 	private int action;
 	
-	public String getUserName() {
-		return userName;
-	}
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-	public String getDevGroupName() {
-		return devGroupName;
-	}
-	public void setDevGroupName(String devGroupName) {
-		this.devGroupName = devGroupName;
-	}
 	public String getLongCoding() {
 		return longCoding;
 	}

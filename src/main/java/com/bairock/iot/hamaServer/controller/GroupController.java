@@ -26,7 +26,7 @@ import com.bairock.iot.intelDev.user.User;
 @RequestMapping(value = "/group")
 @SessionAttributes("user")
 public class GroupController {
-
+	
     @Autowired
     private DevGroupService devGroupService;
     
@@ -69,6 +69,7 @@ public class GroupController {
     @GetMapping("/{groupId}")
     public String showGroup(@PathVariable long groupId, Model model) {
         User user = (User) model.asMap().get("user");
+        
         DevGroup group = user.findDevGroupById(groupId);
         List<Device> listDevState = group.findListIStateDev(true);
         List<DevCollect> listDevCollect = group.findListCollectDev(true);

@@ -15,3 +15,9 @@ spring:
         enable_lazy_load_no_trans: true
 logging:
   file: ./logs/hamaServer.log
+  
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*" # * 在yaml 文件属于关键字
