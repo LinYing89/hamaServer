@@ -81,11 +81,14 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr th:each="dev : ${listDevCollect}" id="'tr_'+${dev.longCoding}">
-							<td th:text="${dev.name}">温度</td>
-							<td id="'tdValue_'+${dev.longCoding}"
-								th:text="${dev.collectProperty.valueWithSymbol}">26℃</td>
-							<td id="'cm_'+${dev.longCoding}">远程</td>
+						<tr th:each="dev : ${listDevCollect}" 
+							th:id="'tr-'+${dev.longCoding}"
+							th:data-state="${dev.devStateId}">
+							<td th:text="${dev.name}">设备名</td>
+							<td>
+								<span th:id="'spanValue-'+${dev.longCoding}"></span>
+								<span th:text="${dev.collectProperty.unitSymbol}">单位符号</span>
+							</td>
 							<td><a class="link dev" href="#" title="${dev.longCoding}">
 									<span data-feather="bar-chart"></span>
 							</a></td>

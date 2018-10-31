@@ -69,6 +69,8 @@ function initWebSocket() {
 		stompClient.subscribe(topicDevState, handlerDevState);
 		var topicDevGear = '/topic/' + userInfo + '/devGear'
 		stompClient.subscribe(topicDevGear, handlerDevGear);
+		var topicDevValue = '/topic/' + userInfo + '/devValue'
+		stompClient.subscribe(topicDevValue, handlerDevValue);
 	});
 }
 
@@ -78,6 +80,7 @@ function handlerDevState(message) {
 	var state = devState.state;
 	switch (state) {
 	case 0:
+	case 3:
 		tr.attr("class", "")
 		//tr.removeClass("table-success");
 		break;
@@ -116,4 +119,10 @@ function handlerDevGear(message) {
 		btnOff.removeClass("active");
 		break;
 	}
+}
+
+function handlerDevValue(message) {
+	var devValue = JSON.parse(message.body);
+	var tdValue = $('#spanValue-' + devValue.longCoding);
+	tdValue.text(devValue.value);
 }
