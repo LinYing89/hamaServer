@@ -14,8 +14,6 @@ public class Config {
 
     private int padPort = 20000;
     private int devicePort = 20001;
-    private String serverIp = "127.0.0.1";
-    private int webSocketPort = 80;
 
     public Long getId() {
         return id;
@@ -35,18 +33,6 @@ public class Config {
     }
     public void setDevicePort(int devicePort) {
         this.devicePort = devicePort;
-    }
-    public String getServerIp() {
-        return serverIp;
-    }
-    public void setServerIp(String serverIp) {
-        this.serverIp = serverIp;
-    }
-    public int getWebSocketPort() {
-        return webSocketPort;
-    }
-    public void setWebSocketPort(int webSocketPort) {
-        this.webSocketPort = webSocketPort;
     }
 
 }

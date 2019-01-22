@@ -197,9 +197,9 @@ public class PadChannelBridge {
 			if(null == dev) {
 				return;
 			}
-			if(dev.getOnGearChanged() == null) {
-				dev.setOnGearChanged(new MyOnGearChangedListener());
-			}
+//			if(dev.getOnGearChanged() == null) {
+//				dev.setOnGearChanged(new MyOnGearChangedListener());
+//			}
 			
 			String state = cutMsg.substring(index + 1);
 			if (state.startsWith("b")) {

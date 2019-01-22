@@ -16,24 +16,30 @@
 
 	<div class="container">
 
-		<div class="list-group">
-			<a href="#"
-				class="list-group-item list-group-item-action flex-column align-items-start"
-				th:each="devGroup : ${user.listDevGroup}"
-				th:href="@{/group/{groupId}(groupId=${devGroup.id})}">
-				<div class="d-flex w-100 justify-content-between">
-					<span class="mb-1" th:text="${devGroup.name}">组名</span>
-					<div class="btn-group btn-group-sm" role="group">
-						<button type="button" th:title="${devGroup.id}"
-							class="btn btn-light btnEdit">编辑</button>
-						<button type="button" th:title="${devGroup.id}"
-							class="btn btn-light btnDel">删除</button>
-					</div>
-				</div>
-			</a>
-		</div>
-		<a class="btn btn-primary btn-block" href="#" role="button"
-			th:href="@{/group/register}">添加组</a>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>组名</th>
+					<th>昵称</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="group : ${user.listDevGroup}">
+					<td><a href="#" th:href="|/device/page/${group.id}|" th:text="${group.name}">组名</a></td>
+					<td th:text="${group.petName}">昵称</td>
+					<td>
+						<a href="#" data-option="edit"
+							data-toggle="modal" data-target="#editGroupModal"
+							th:attr="data-group-id=${group.id}, data-group-name=${group.name}, data-group-password=${group.psd}, data-group-petname=${group.petName}">编辑</a>
+						<a class="del-group" href="#" th:href="|/group/del/${group.id}|">删除</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#editGroupModal"
+			data-option="add" th:attr="data-user-id=${user.id}">添加组</button>
 	</div>
 
 	<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog"
@@ -52,7 +58,49 @@
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary"
 						data-dismiss="modal">取消</button>
-					<button id="btnModalDelGroup" type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+					<button id="btnModalDelGroup" type="button" class="btn btn-primary"
+						data-dismiss="modal">确定</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="editGroupModal" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="editGroupModalTitle">添加组</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form th:action="|/group/add/${user.id}|" method="post" onsubmit="return checkGroupForm()">
+						<div class="form-group">
+							<label>组名称</label> <input type="text"
+								class="form-control" id="group-name" name="name"
+								required="required">
+						</div>
+						<div class="form-group">
+							<label>组昵称</label> <input type="text"
+								class="form-control" id="group-petname" name="petName"
+								required="required">
+						</div>
+
+						<div class="form-group">
+							<label>密码</label> <input type="text"
+								class="form-control" id="group-password" name="psd">
+						</div>
+						<div class="form-group">
+							<label>确认密码</label> <input type="text"
+								class="form-control" id="group-ensurepassword">
+						</div>
+						<div class="form-group">
+							<span id="manager-code-repeated" class="text-danger"></span>
+						</div>
+						<button type="submit" class="btn btn-primary">提交</button>
+					</form>
 				</div>
 			</div>
 		</div>

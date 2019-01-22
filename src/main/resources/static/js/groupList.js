@@ -1,31 +1,43 @@
 $(document).ready(function() {
-	$(".btnEdit").click(function() {
-		btnEditGroup(this);
-		//阻止超链接
+	
+	$(".del-group").click(function() {
+		var r = confirm("确认删除设备组吗?");
+		if (r == true) {
+			var url = $(this).attr("href");
+			window.location.href=url;
+		} 
 		return false;
-	});
-	$(".btnDel").click(function() {
-		btnDelGroup(this);
-		return false;
-	});
-	$("#btnModalDelGroup").click(function() {
-		var groupId = $("#groupId").text();
-		$(location).prop('href', '/group/delete/' + groupId);
 	});
 });
 
-//编辑操作
-function btnEditGroup(liGroup) {
-	//获取元素title属性值, title属性值为组id
-	var title=liGroup.getAttribute("title");
-	console.info(title);
-	$(location).prop('href', '/group/edit/' + title);
-}
+$('#editGroupModal').on('show.bs.modal', function(event) {
+	var modal = $(this)
+	var target = $(event.relatedTarget) // Button that triggered the modal
+	var title = modal.find('#editGroupModalTitle');
+	if (target.data('option') == 'add') {
+		title.text("添加设备组");
+		var userId = target.data('user-id')
+		modal.find('form').attr('action', '/group/add/' + userId)
+	} else {
+		title.text("编辑设备组");
+		var groupId = target.data('group-id')
+		var groupName = target.data('group-name') // Extract info from data-*
+		var groupPetName = target.data('group-petname')
+		var password = target.data('group-password')
+		
+		modal.find('#group-name').val(groupName)
+		modal.find('#group-petname').val(groupPetName)
+		modal.find('#group-password').val(password)
+		modal.find('#group-ensurepassword').val(password)
+		modal.find('form').attr('action', '/group/edit/' + groupId)
+	}
+});
 
-//删除操作
-function btnDelGroup(liGroup) {
-	var title=liGroup.getAttribute("title");
-	console.info(title);
-	$("#groupId").text(title);
-	$('#deleteModal').modal('show')
+function checkGroupForm(){
+	var password = $('#group-password').val();
+	var ensurePassword = $('#group-ensurepassword').val();
+	if(password != ensurePassword){
+		return false;
+	}
+	return true;
 }

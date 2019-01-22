@@ -3,6 +3,7 @@ package com.bairock.iot.hamaServer.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bairock.iot.hamaServer.Util;
 import com.bairock.iot.hamaServer.data.Result;
 import com.bairock.iot.hamaServer.enums.ResultEnum;
 import com.bairock.iot.hamaServer.exception.UserException;
@@ -14,8 +15,33 @@ import com.bairock.iot.intelDev.user.User;
 @Service
 public class UserService {
 
+//	@Autowired
+//	private UserService self;
+	
 	@Autowired
 	private UserRepository userRepository;
+	
+	public User findById(long userId) {
+		User user = userRepository.findById(userId).orElse(null);
+//		if(null != user) {
+//			return self.findByName(user.getName());
+//		}
+		return user;
+	}
+	
+//	@Cacheable(value = "user", key = "#userName")
+	public User findByName(String userName) {
+		User user = userRepository.findByName(userName);
+		return user;
+	}
+	
+//	@CachePut(value = "user", key="#result.name")
+	public User addUser(User user) {
+		String psd = user.getPsd();
+		String encodePsd = Util.encodePassword(psd);
+		user.setPsd(encodePsd);
+		return userRepository.saveAndFlush(user);
+	}
 	
 	/**
 	 * 用户数据上传

@@ -1,8 +1,10 @@
 package com.bairock.iot.hamaServer.communication;
 
-import com.bairock.iot.hamaServer.SpringUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.bairock.iot.hamaServer.data.webData.WebDevGear;
-import com.bairock.iot.hamaServer.service.DeviceService;
+import com.bairock.iot.hamaServer.service.DeviceBroadcastService;
 import com.bairock.iot.intelDev.device.Device;
 import com.bairock.iot.intelDev.device.Device.OnGearChangedListener;
 import com.bairock.iot.intelDev.device.Gear;
@@ -13,9 +15,11 @@ import com.bairock.iot.intelDev.device.IStateDev;
  * @author 44489
  *
  */
+@Component
 public class MyOnGearChangedListener implements OnGearChangedListener {
 
-	private DeviceService deviceService = SpringUtil.getBean(DeviceService.class);
+	@Autowired
+	private DeviceBroadcastService deviceService;
 	
 	@Override
 	public void onGearChanged(Device dev, Gear gear) {

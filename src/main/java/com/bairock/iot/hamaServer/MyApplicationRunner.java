@@ -1,9 +1,9 @@
-package com.bairock.iot.hamaServer.service;
+package com.bairock.iot.hamaServer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 
 import com.bairock.iot.hamaServer.communication.MyDevChannelBridge;
 import com.bairock.iot.hamaServer.communication.MyOnPadDisconnectedListener;
@@ -13,19 +13,13 @@ import com.bairock.iot.hamaServer.data.Config;
 import com.bairock.iot.intelDev.communication.DevChannelBridgeHelper;
 import com.bairock.iot.intelDev.communication.DevServer;
 
-/**
- * 开启自定义的tcp服务器
- * 好像不用手动关闭, spring boot 关闭的时候, 也就自动关闭了
- * @author 44489
- *
- */
-@Service
-public class TcpServerService {
+public class MyApplicationRunner implements ApplicationRunner {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private Config config = SpringUtil.getBean(Config.class);
 	
-	@Autowired
-	public TcpServerService(Config config) {
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
 		logger.info("TcpServerServicer begin");
         DevChannelBridgeHelper.DEV_CHANNELBRIDGE_NAME = MyDevChannelBridge.class.getName();
         DevServer.PORT = config.getDevicePort();

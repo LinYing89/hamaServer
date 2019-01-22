@@ -12,42 +12,25 @@
 <body>
 	<div th:replace="fragments/header :: header('','')">header</div>
 	<br>
-	<form action="#" th:action="@{/user/register}"
-		th:object="${registerUserHelper}" method="post">
+	<form action="#" th:action="@{/user/register}" method="post">
 		<div class="form-group row justify-content-md-center">
 			<div class="row col-sm-12 col-md-6 col-xl-4">
-				<label for="inputEmail" class="col-auto col-form-label">用户名</label>
-				<div class="col-9 ml-auto">
-					<input class="form-control" id="inputEmail" placeholder="用户名"
-						th:field="*{name}" th:value="${registerUserHelper.name}" required
-						th:classappend="${registerUserHelper.userNameError != ''} ? 'is-invalid'">
-					<div class="invalid-feedback"
-						th:if="${registerUserHelper.userNameError == ''}"
-						th:text="${registerUserHelper.userNameError}">用户名错误</div>
-				</div>
+				<label class="col-3 col-form-label">用户名</label>
+				<input class="col-9 form-control" id="input-username" placeholder="用户名" name="name" required>
 			</div>
 		</div>
 		<div class="form-group row justify-content-md-center">
 			<div class="row col-sm-12 col-md-6 col-xl-4">
-				<label for="inputPassword" class="col-auto col-form-label">密&nbsp;&nbsp;&nbsp;码</label>
-				<div class="col-9 ml-auto">
-					<input class="form-control" id="inputPassword" placeholder="密码"
-						th:field="*{password}" th:value="${registerUserHelper.password}"
-						required
-						th:classappend="${registerUserHelper.passwordError != ''} ? 'is-invalid'">
-					<div class="invalid-feedback"
-						th:if="${registerUserHelper.passwordError == ''}"
-						th:text="${registerUserHelper.passwordError}">密码错误</div>
-				</div>
+				<label class="col-3 col-form-label">密&nbsp;&nbsp;&nbsp;码</label>
+					<input class="col-9 form-control" id="input-psd" placeholder="密码" name="psd"
+						required>
 			</div>
 		</div>
 		<div class="form-group row justify-content-md-center">
 			<div class="row col-sm-12 col-md-6 col-xl-4">
-				<label for="ensurePassword" class="col-auto col-form-label">确认密码</label>
-				<div class="col-9 ml-auto">
-					<input type="password" class="form-control" id="ensurePassword"
-						placeholder="确认密码" th:field="*{ensurePassword}" required>
-				</div>
+				<label class="col-3 col-form-label">确认密码</label>
+					<input type="password" class="col-9 form-control" id="input-ensure-psd"
+						placeholder="确认密码" required>
 			</div>
 		</div>
 		<div class="form-group row justify-content-md-center">

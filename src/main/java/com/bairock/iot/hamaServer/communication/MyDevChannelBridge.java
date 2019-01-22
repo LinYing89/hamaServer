@@ -14,23 +14,37 @@ import com.bairock.iot.intelDev.device.DevHaveChild;
 import com.bairock.iot.intelDev.device.DevStateHelper;
 import com.bairock.iot.intelDev.device.Device;
 import com.bairock.iot.intelDev.device.OrderHelper;
+import com.bairock.iot.intelDev.device.devcollect.DevCollect;
+import com.bairock.iot.intelDev.device.devswitch.SubDev;
 import com.bairock.iot.intelDev.user.DevGroup;
 import com.bairock.iot.intelDev.user.User;
 
 public class MyDevChannelBridge extends DevChannelBridge {
 
 	private UserRepository userRepository;
-	
+	private DeviceService deviceService;
+
 	private String userName;
 	private String groupName;
-	
-	//缓存收到的数据
+
+	// 缓存收到的数据
 	StringBuilder sb = new StringBuilder();
-	
+
 	private Logger logger = LoggerFactory.getLogger(MyDevChannelBridge.class);
 	
+	private MyOnCurrentValueChangedListener myOnCurrentValueChangedListener;
+	private MyOnStateChangedListener myOnStateChangedListener;
+	private MyOnGearChangedListener myOnGearChangedListener;
+	private MyOnCtrlModelChangedListener myOnCtrlModelChangedListener;
+
 	public MyDevChannelBridge() {
 		userRepository = SpringUtil.getBean(UserRepository.class);
+		deviceService = SpringUtil.getBean(DeviceService.class);
+		
+		myOnCurrentValueChangedListener = SpringUtil.getBean(MyOnCurrentValueChangedListener.class);
+		myOnStateChangedListener = SpringUtil.getBean(MyOnStateChangedListener.class);
+		myOnGearChangedListener = SpringUtil.getBean(MyOnGearChangedListener.class);
+		myOnCtrlModelChangedListener = SpringUtil.getBean(MyOnCtrlModelChangedListener.class);
 		
 		setOnCommunicationListener(new OnCommunicationListener() {
 
@@ -49,7 +63,7 @@ public class MyDevChannelBridge extends DevChannelBridge {
 			}
 		});
 	}
-	
+
 	private String createUserInfo() {
 		String info = "u:";
 		info += (null == userName ? "" : userName);
@@ -57,11 +71,11 @@ public class MyDevChannelBridge extends DevChannelBridge {
 		info += (null == groupName ? "" : groupName);
 		return info;
 	}
-	
+
 	@Override
 	public void channelReceived(String msg, User user) {
-		 logger.info(msg);
-		
+		logger.info(msg);
+
 		if (null != getOnCommunicationListener()) {
 			getOnCommunicationListener().onReceived(this, msg);
 		}
@@ -69,6 +83,14 @@ public class MyDevChannelBridge extends DevChannelBridge {
 		if (judgeMsgFormate(sb.toString())) {
 			analysisReceiveMessage(msg);
 			sb.setLength(0);
+		}
+	}
+	
+	@Override
+	public void close() {
+		super.close();
+		if(null != getDevice()) {
+			removeDeviceListener(getDevice());
 		}
 	}
 
@@ -95,7 +117,7 @@ public class MyDevChannelBridge extends DevChannelBridge {
 			analysisSingleMsg(data);
 		}
 	}
-	
+
 	public void analysisSingleMsg(String msg) {
 		if (!msg.contains("#")) {
 			return;
@@ -125,22 +147,24 @@ public class MyDevChannelBridge extends DevChannelBridge {
 				if (null == dev) {
 					return;
 				}
+				if(dev.getParent() != null) {
+					Device parent = dev.findSuperParent();
+					parent = deviceService.findByDevGroupIdAndId(group.getId(), parent.getId());
+					setDevice(parent);
+				}else {
+					setDevice(dev);
+				}
 				this.userName = userName;
 				this.groupName = groupName;
-
-				// dg.addDevice(dev1);
-				// user1.addGroup(dg);
-				dev.setCtrlModel(CtrlModel.UNKNOW);
-				dev.setDevStateId(DevStateHelper.DS_YI_CHANG);
-				setDevice(dev);
-				//设置设备监听器
-				DeviceService.setDeviceListener(dev);
+				
+				setDeviceListener(getDevice());
+				
 				sendOrder(dev.createInitOrder());
 				setDeviceToZhangChang(dev);
 				if (null != state) {
 					handleState(dev, state);
 				}
-			} 
+			}
 
 		} else {
 			if (null != coding) {
@@ -175,6 +199,42 @@ public class MyDevChannelBridge extends DevChannelBridge {
 		dev.handle(state);
 	}
 	
+	private void setDeviceListener(Device device) {
+		device.setCtrlModel(CtrlModel.UNKNOW);
+		device.setDevStateId(DevStateHelper.DS_YI_CHANG);
+		device.addOnStateChangedListener(myOnStateChangedListener);
+		device.addOnCtrlModelChangedListener(myOnCtrlModelChangedListener);
+		if(device instanceof DevCollect) {
+			DevCollect dc = (DevCollect)device;
+			dc.getCollectProperty().addOnCurrentValueChangedListener(myOnCurrentValueChangedListener);
+//			dc.getCollectProperty().initTriggerListener();
+		}else if(device instanceof SubDev) {
+			device.addOnGearChangedListener(myOnGearChangedListener);
+		}
+		if (device instanceof DevHaveChild) {
+			for (Device device1 : ((DevHaveChild) device).getListDev()) {
+				setDeviceListener(device1);
+			}
+		}
+	}
+	
+	private void removeDeviceListener(Device device) {
+		device.removeOnStateChangedListener(myOnStateChangedListener);
+		device.removeOnCtrlModelChangedListener(myOnCtrlModelChangedListener);
+		if(device instanceof DevCollect) {
+			DevCollect dc = (DevCollect)device;
+			dc.getCollectProperty().removeOnCurrentValueChangedListener(myOnCurrentValueChangedListener);
+//			dc.getCollectProperty().initTriggerListener();
+		}else if(device instanceof SubDev) {
+			device.removeOnGearChangedListener(myOnGearChangedListener);
+		}
+		if (device instanceof DevHaveChild) {
+			for (Device device1 : ((DevHaveChild) device).getListDev()) {
+				setDeviceListener(device1);
+			}
+		}
+	}
+
 	public static MyDevChannelBridge findBridge(Device device) {
 //		if(null == device || null == device.findSuperParent().getDevGroup() || null == device.findSuperParent().getDevGroup().getUser()) {
 //			return null;
@@ -182,11 +242,12 @@ public class MyDevChannelBridge extends DevChannelBridge {
 		Device rootDev = device.findSuperParent();
 		String groupName = rootDev.getDevGroup().getName();
 		String userName = rootDev.getDevGroup().getUser().getName();
-		DevChannelBridge d = DevChannelBridgeHelper.getIns().getDevChannelBridge(rootDev.getCoding(), userName, groupName);
-		if(null != d) {
-			return (MyDevChannelBridge)d;
+		DevChannelBridge d = DevChannelBridgeHelper.getIns().getDevChannelBridge(rootDev.getCoding(), userName,
+				groupName);
+		if (null != d) {
+			return (MyDevChannelBridge) d;
 		}
 		return null;
 	}
-	
+
 }

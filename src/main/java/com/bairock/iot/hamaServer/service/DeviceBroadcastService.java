@@ -1,44 +1,27 @@
 package com.bairock.iot.hamaServer.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import com.bairock.iot.hamaServer.communication.PadChannelBridgeHelper;
 import com.bairock.iot.hamaServer.data.webData.WebDevGear;
 import com.bairock.iot.hamaServer.data.webData.WebDevState;
 import com.bairock.iot.hamaServer.data.webData.WebDevValue;
-import com.bairock.iot.hamaServer.repository.DeviceRepo;
-import com.bairock.iot.intelDev.device.Device;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Service
-public class DeviceService {
+@Component
+public class DeviceBroadcastService {
 
 	private SimpMessageSendingOperations messaging;
 	
 	@Autowired
-	private DeviceRepo deviceRepo;
-	
-	@Cacheable(value="device", key="#devGroupId + ':' + #id")
-	public Device findByDevGroupIdAndId(String devGroupId, String id) {
-		return deviceRepo.findByDevGroupIdAndId(devGroupId, id);
-	}
-
-	public List<Device> findDeviceByDevGroupId(String devGroupId){
-		return deviceRepo.findByDevGroupId(devGroupId);
-	}
-	
-    @Autowired
-    public DeviceService(SimpMessageSendingOperations messaging) {
+    public DeviceBroadcastService(SimpMessageSendingOperations messaging) {
         this.messaging = messaging;
     }
-    
-    /**
+	
+	/**
      * 向网页发送设备的状态bean
      * @param userName
      * @param devGroupName
@@ -81,5 +64,4 @@ public class DeviceService {
     	String topic = String.format("/topic/%s-%s/devValue", userName, devGroupName);
         messaging.convertAndSend(topic, webDevValue);
     }
-    
 }

@@ -1,19 +1,16 @@
 package com.bairock.iot.hamaServer.service;
 
-import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 
 import com.bairock.iot.hamaServer.data.Config;
 import com.bairock.iot.hamaServer.data.DevGroupLoginResult;
-import com.bairock.iot.hamaServer.data.RegisterUserHelper;
 import com.bairock.iot.hamaServer.data.Result;
 import com.bairock.iot.hamaServer.enums.ResultEnum;
 import com.bairock.iot.hamaServer.exception.UserException;
 import com.bairock.iot.hamaServer.repository.GroupRepository;
-import com.bairock.iot.hamaServer.repository.UserRepository;
 import com.bairock.iot.intelDev.user.DevGroup;
 import com.bairock.iot.intelDev.user.User;
 
@@ -23,62 +20,30 @@ public class DevGroupService {
 	@Autowired
 	private GroupRepository groupRepository;
 	@Autowired
-	private UserRepository userRepository;
+	private UserService userService;
 	
 	@Autowired
 	private Config config;
 
-	/**
-	 * 注册或编辑组页面提交
-	 * 
-	 * @param model       Model对象
-	 * @param groupHelper 表单对象数据对象
-	 * @return 注册或编辑成功返回true, 否则false
-	 */
-	public boolean registerSubmit(Model model, RegisterUserHelper groupHelper) {
-		if (groupHelper.getName().isEmpty()) {
-			groupHelper.setUserNameError("组名为空");
-			return false;
-		} else if (groupHelper.getName().length() > 16) {
-			groupHelper.setUserNameError("用户名长度必须小于16");
-			return false;
+	public DevGroup findById(String id) {
+		return groupRepository.findById(id).orElse(null);
+	}
+	
+//	@CachePut(value = "devGroup", key = "#result.id")
+	public DevGroup addGroup(long userId, DevGroup group) {
+		User user = userService.findById(userId);
+		if(null != user) {
+			group.setId(UUID.randomUUID().toString());
+			
+//			DevGroup g = new DevGroup();
+//			g.setId(UUID.randomUUID().toString());
+			
+			group.setUser(user);
+//			user.addGroup(g);
+//			userRepository.saveAndFlush(user);
+			group = groupRepository.saveAndFlush(group);
 		}
-		if (groupHelper.getPassword().isEmpty()) {
-			groupHelper.setPasswordError("密码为空");
-			return false;
-		}
-		if (!groupHelper.passwordEnsure()) {
-			groupHelper.setPasswordError("两次输入的密码不一致");
-			return false;
-		}
-
-		User user = (User) model.asMap().get("user");
-		DevGroup devGroupDb = null;
-		if (groupHelper.getId() != 0) {
-			// 是编辑组
-			devGroupDb = user.findDevGroupById(groupHelper.getId());
-			devGroupDb.setName(groupHelper.getName());
-			devGroupDb.setPetName(groupHelper.getPetName());
-			devGroupDb.setPsd(groupHelper.getPassword());
-			groupRepository.save(devGroupDb);
-			return true;
-		} else {
-			// 注册组
-			devGroupDb = user.findDevGroupByName(groupHelper.getName());
-			if (null != devGroupDb) {
-				groupHelper.setPasswordError("组名已存在");
-				return false;
-			}
-
-			DevGroup group = new DevGroup();
-			group.setName(groupHelper.getName());
-			group.setPetName(groupHelper.getPetName());
-			group.setPsd(groupHelper.getPassword());
-
-			user.addGroup(group);
-			groupRepository.save(group);
-			return true;
-		}
+		return group;
 	}
 
 	/**
@@ -88,25 +53,16 @@ public class DevGroupService {
 	 * @param model Model对象
 	 * @return 编辑组页面
 	 */
-	public String editGroup(long id, Model model) {
-		User user = (User) model.asMap().get("user");
-		DevGroup devGroupDb = user.findDevGroupById(id);
-		RegisterUserHelper ru = new RegisterUserHelper();
-		ru.setEdit(true);
-		ru.setId(id);
-		ru.setName(devGroupDb.getName());
-		ru.setPetName(devGroupDb.getPetName());
-		ru.setPassword(devGroupDb.getPsd());
-		model.addAttribute("registerGroupHelper", ru);
-		return "group/groupRegister";
-	}
-
-	public String showGroupList(long userId, Model model) {
-		if (!model.containsAttribute("user")) {
-			Optional<User> optionalUser = userRepository.findById(userId);
-			optionalUser.ifPresent(user -> model.addAttribute("user", user));
+	public DevGroup editGroup(String id, DevGroup group) {
+		DevGroup groupDb = groupRepository.findById(id).orElse(null);
+		if(null != groupDb) {
+			groupDb.setName(group.getName());
+			groupDb.setPetName(group.getPetName());
+			groupDb.setPsd(group.getPsd());
+			groupRepository.saveAndFlush(groupDb);
 		}
-		return "group/groupList";
+		
+		return groupDb;
 	}
 	
 	/**
@@ -115,15 +71,11 @@ public class DevGroupService {
 	 * @param model Model对象
 	 * @return 是否删除成功
 	 */
-	public boolean deleteGroup(long id, Model model) {
-		User user = (User) model.asMap().get("user");
-		DevGroup devGroupDb = user.findDevGroupById(id);
-		if(null == devGroupDb) {
-			return false;
-		}
-		user.removeGroup(devGroupDb);
-		groupRepository.delete(devGroupDb);
-		return true;
+//	@CacheEvict(value = "msgmanager", key = "#result.code")
+	public DevGroup deleteGroup(String id) {
+		DevGroup groupDb = groupRepository.findById(id).orElse(null);
+		groupRepository.deleteById(id);
+		return groupDb;
 	}
 	
 	/**
@@ -133,7 +85,7 @@ public class DevGroupService {
 	 * @param devGroupPsg 组密码
 	 */
 	public Result<DevGroupLoginResult> devGroupLogin(String userName, String devGroupName, String devGroupPsg) throws Exception{
-		User user = userRepository.findByName(userName);
+		User user = userService.findByName(userName);
 		if(null == user) {
 			throw new UserException(ResultEnum.USER_NAME_DB_NULL);
 		}
@@ -160,7 +112,7 @@ public class DevGroupService {
 	 * @throws Exception
 	 */
 	public Result<DevGroup> groupDownload(String userName, String devGroupName) throws Exception {
-		User user = userRepository.findByName(userName);
+		User user = userService.findByName(userName);
 		if(null == user) {
 			throw new UserException(ResultEnum.USER_NAME_DB_NULL);
 		}

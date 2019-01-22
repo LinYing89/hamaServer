@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.bairock.iot.intelDev.user.DevGroup;
 
-public interface GroupRepository extends JpaRepository<DevGroup, Long> {
+public interface GroupRepository extends JpaRepository<DevGroup, String> {
 
 	/**
 	 * 根据用户ID查询所有设备组

@@ -13,78 +13,33 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.bairock.iot.hamaServer.data.RegisterUserHelper;
 import com.bairock.iot.hamaServer.data.Result;
-import com.bairock.iot.hamaServer.data.Untils;
-import com.bairock.iot.hamaServer.repository.UserRepository;
 import com.bairock.iot.hamaServer.service.UserService;
 import com.bairock.iot.intelDev.user.User;
 
 @Controller
 @RequestMapping(value = "/user")
-@SessionAttributes("user")
 public class UserController {
-
-	@Autowired
-    private UserRepository userRepository;
 	
 	@Autowired
 	private UserService userService;
 
     //打开注册页面
-    @GetMapping("/register")
-    public String registerForm(Model model) {
-        model.addAttribute("registerUserHelper", new RegisterUserHelper());
+    @GetMapping("/page/register")
+    public String registerForm() {
         return "register";
     }
 
     //提交注册信息
     @PostMapping("/register")
-    public String registerSubmit(RedirectAttributes model, @ModelAttribute RegisterUserHelper userHelper) {
-        //RegisterUserHelper error = new RegisterUserHelper();
-        if(userHelper.getName().isEmpty()){
-            userHelper.setUserNameError("用户名为空");
-            model.addAttribute("registerUserHelper", userHelper);
-            return "register";
-        }
-        User user = new User();
-        user.setName(userHelper.getName());
-        boolean isEmail = Untils.isEmail(userHelper.getName());
-        if(isEmail){
-            user.setEmail(userHelper.getName());
-        }else if(Untils.isMobileNumber(userHelper.getName())){
-            user.setTel(userHelper.getName());
-        }else if(userHelper.getName().length() < 3 || userHelper.getName().length() > 16){
-            userHelper.setUserNameError("用户名长度必须大于3并且小于16");
-            model.addAttribute("registerUserHelper", userHelper);
-            return "register";
-        }
-        User userDb = userRepository.findByName(user.getName());
-        if(null != userDb){
-            userHelper.setUserNameError("用户已存在");
-            model.addAttribute("registerUserHelper", userHelper);
-            return "register";
-        }
+    public String registerSubmit(RedirectAttributes model, @ModelAttribute User user) {
 
-        if(userHelper.getPassword().isEmpty()){
-            userHelper.setPasswordError("密码为空");
-            model.addAttribute("registerUserHelper", userHelper);
-            return "register";
-        }
-        if(!userHelper.passwordEnsure()){
-            userHelper.setPasswordError("两次输入的密码不一致");
-            model.addAttribute("registerUserHelper", userHelper);
-            return "register";
-        }
-        user.setPsd(userHelper.getPassword());
-        userRepository.save(user);
+    	userService.addUser(user);
         //重定向
-        model.addAttribute("userId", user.getId());
-        model.addFlashAttribute("user", user);
-        return "redirect:/group/list/{userId}";
+        return "redirect:/loginSucces";
     }
 
     //打开登录页面
@@ -97,7 +52,7 @@ public class UserController {
     //提交登录信息
     @PostMapping("/login")
     public String loginCheck(HttpServletResponse httpServletResponse, RedirectAttributes model, @ModelAttribute RegisterUserHelper userHelper) {
-        User userDb = userRepository.findByName(userHelper.getName());
+        User userDb = userService.findByName(userHelper.getName());
         if(null == userDb){
             userHelper.setUserNameError("用户不存在");
             return "login";
