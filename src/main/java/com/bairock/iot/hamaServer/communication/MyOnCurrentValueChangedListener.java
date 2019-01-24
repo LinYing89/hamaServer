@@ -17,13 +17,12 @@ public class MyOnCurrentValueChangedListener implements OnCurrentValueChangedLis
 	
 	@Override
 	public void onCurrentValueChanged(DevCollect dev, Float value) {
+		
 		Device superParent = dev.findSuperParent();
-		String userName = superParent.getDevGroup().getUser().getName();
-		String devGroupName = superParent.getDevGroup().getName();
 		if (dev instanceof DevCollect) {
 			//通知网页
 			WebDevValue webDevValue = new WebDevValue(dev.getLongCoding(), dev.getCollectProperty().getCurrentValue());
-			deviceService.broadcastValueChanged(userName, devGroupName, webDevValue);
+			deviceService.broadcastValueChanged(superParent.getUsername(), superParent.getDevGroupName(), webDevValue);
 		}
 	}
 

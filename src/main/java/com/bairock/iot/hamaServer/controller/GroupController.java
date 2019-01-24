@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -61,14 +62,22 @@ public class GroupController {
     
     //客户端组登录
     @ResponseBody
-    @GetMapping("/devGroupLogin/{userName}/{groupName}/{groupPsd}")
+    @GetMapping("/client/devGroupLogin/{userName}/{groupName}/{groupPsd}")
     public Result<DevGroupLoginResult> devGroupLogin(@PathVariable String userName, @PathVariable String groupName, @PathVariable String groupPsd, Model model) throws Exception{
     	return devGroupService.devGroupLogin(userName, groupName, groupPsd);
     }
     
+    //客户端组下载
     @ResponseBody
-    @GetMapping("/groupDownload/{userName}/{groupName}")
+    @GetMapping("/client/groupDownload/{userName}/{groupName}")
     public Result<DevGroup> userDownload(@PathVariable String userName, @PathVariable String groupName) throws Exception{
     	return devGroupService.groupDownload(userName, groupName);
+    }
+    
+    //客户端组上传
+    @ResponseBody
+    @PostMapping("/client/groupUpload")
+    public Result<Object> userUpload(@RequestBody User user) throws Exception{
+    	return devGroupService.groupUpload(user);
     }
 }

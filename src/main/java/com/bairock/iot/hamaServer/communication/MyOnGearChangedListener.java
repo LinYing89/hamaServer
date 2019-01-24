@@ -24,12 +24,10 @@ public class MyOnGearChangedListener implements OnGearChangedListener {
 	@Override
 	public void onGearChanged(Device dev, Gear gear) {
 		Device superParent = dev.findSuperParent();
-		String userName = superParent.getDevGroup().getUser().getName();
-		String devGroupName = superParent.getDevGroup().getName();
 		if (dev instanceof IStateDev) {
 			//通知网页
 			WebDevGear webDevGear = new WebDevGear(dev.getLongCoding(), Integer.parseInt(dev.getDevState()));
-			deviceService.broadcastGearChanged(userName, devGroupName, webDevGear);
+			deviceService.broadcastGearChanged(superParent.getUsername(), superParent.getDevGroupName(), webDevGear);
 		}
 	}
 

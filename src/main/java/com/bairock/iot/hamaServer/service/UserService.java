@@ -57,7 +57,7 @@ public class UserService {
 		}
 		User userDb = userRepository.findByName(user.getName());
 		if(null == userDb) {
-			throw new UserException(ResultEnum.USER_NAME_DB_NULL);
+			throw new UserException(ResultEnum.ERR_USERNAME);
 		}
 		DevGroup devGroup = user.getListDevGroup().get(0);
 		DevGroup devGroupDb = userDb.findDevGroupByName(devGroup.getName());
@@ -82,7 +82,7 @@ public class UserService {
 		User user = userRepository.findByName(name);
 		Result<User> r = new Result<>();
 		if(null == user) {
-			throw new UserException(ResultEnum.USER_NAME_DB_NULL);
+			throw new UserException(ResultEnum.ERR_USERNAME);
 		}
 		r.setCode(ResultEnum.SUCCESS.getCode());
 		r.setData(user);

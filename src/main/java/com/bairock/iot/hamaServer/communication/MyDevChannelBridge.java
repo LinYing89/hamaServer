@@ -64,6 +64,22 @@ public class MyDevChannelBridge extends DevChannelBridge {
 		});
 	}
 
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+
 	private String createUserInfo() {
 		String info = "u:";
 		info += (null == userName ? "" : userName);
@@ -90,7 +106,7 @@ public class MyDevChannelBridge extends DevChannelBridge {
 	public void close() {
 		super.close();
 		if(null != getDevice()) {
-			removeDeviceListener(getDevice());
+//			removeDeviceListener(getDevice());
 		}
 	}
 
@@ -149,10 +165,18 @@ public class MyDevChannelBridge extends DevChannelBridge {
 				}
 				if(dev.getParent() != null) {
 					Device parent = dev.findSuperParent();
-					parent = deviceService.findByDevGroupIdAndId(group.getId(), parent.getId());
+					parent = deviceService.findById(parent.getId());
 					setDevice(parent);
+					dev.setUsername(userName);
+					dev.setDevGroupName(groupName);
+					//重新获取缓存中的数据, 使系统中设备对象唯一
+					dev = ((DevHaveChild)parent).findDevByCoding(coding);
 				}else {
+					//重新获取缓存中的数据, 使系统中设备对象唯一
+					dev = deviceService.findById(dev.getId());
 					setDevice(dev);
+					dev.setUsername(userName);
+					dev.setDevGroupName(groupName);
 				}
 				this.userName = userName;
 				this.groupName = groupName;
@@ -202,8 +226,12 @@ public class MyDevChannelBridge extends DevChannelBridge {
 	private void setDeviceListener(Device device) {
 		device.setCtrlModel(CtrlModel.UNKNOW);
 		device.setDevStateId(DevStateHelper.DS_YI_CHANG);
-		device.addOnStateChangedListener(myOnStateChangedListener);
-		device.addOnCtrlModelChangedListener(myOnCtrlModelChangedListener);
+		if(device.getStOnStateChangedListener().isEmpty()) {
+			device.addOnStateChangedListener(myOnStateChangedListener);
+		}
+		if(device.getStOnCtrlModelChanged().isEmpty()) {
+			device.addOnCtrlModelChangedListener(myOnCtrlModelChangedListener);
+		}
 		if(device instanceof DevCollect) {
 			DevCollect dc = (DevCollect)device;
 			dc.getCollectProperty().addOnCurrentValueChangedListener(myOnCurrentValueChangedListener);
@@ -218,22 +246,22 @@ public class MyDevChannelBridge extends DevChannelBridge {
 		}
 	}
 	
-	private void removeDeviceListener(Device device) {
-		device.removeOnStateChangedListener(myOnStateChangedListener);
-		device.removeOnCtrlModelChangedListener(myOnCtrlModelChangedListener);
-		if(device instanceof DevCollect) {
-			DevCollect dc = (DevCollect)device;
-			dc.getCollectProperty().removeOnCurrentValueChangedListener(myOnCurrentValueChangedListener);
-//			dc.getCollectProperty().initTriggerListener();
-		}else if(device instanceof SubDev) {
-			device.removeOnGearChangedListener(myOnGearChangedListener);
-		}
-		if (device instanceof DevHaveChild) {
-			for (Device device1 : ((DevHaveChild) device).getListDev()) {
-				setDeviceListener(device1);
-			}
-		}
-	}
+//	private void removeDeviceListener(Device device) {
+//		device.removeOnStateChangedListener(myOnStateChangedListener);
+//		device.removeOnCtrlModelChangedListener(myOnCtrlModelChangedListener);
+//		if(device instanceof DevCollect) {
+//			DevCollect dc = (DevCollect)device;
+//			dc.getCollectProperty().removeOnCurrentValueChangedListener(myOnCurrentValueChangedListener);
+////			dc.getCollectProperty().initTriggerListener();
+//		}else if(device instanceof SubDev) {
+//			device.removeOnGearChangedListener(myOnGearChangedListener);
+//		}
+//		if (device instanceof DevHaveChild) {
+//			for (Device device1 : ((DevHaveChild) device).getListDev()) {
+//				setDeviceListener(device1);
+//			}
+//		}
+//	}
 
 	public static MyDevChannelBridge findBridge(Device device) {
 //		if(null == device || null == device.findSuperParent().getDevGroup() || null == device.findSuperParent().getDevGroup().getUser()) {

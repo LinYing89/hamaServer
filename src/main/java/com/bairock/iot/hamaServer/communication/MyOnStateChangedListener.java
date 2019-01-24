@@ -26,12 +26,10 @@ public class MyOnStateChangedListener implements OnStateChangedListener {
 	@Override
 	public void onStateChanged(Device dev, String stateId) {
 		Device superParent = dev.findSuperParent();
-		String userName = superParent.getDevGroup().getUser().getName();
-		String devGroupName = superParent.getDevGroup().getName();
 		if (dev instanceof IStateDev || dev instanceof DevCollect) {
 			//通知网页
 			WebDevState webDevState = new WebDevState(dev.getLongCoding(), Integer.parseInt(dev.getDevState()));
-			deviceService.broadcastStateChanged(userName, devGroupName, webDevState);
+			deviceService.broadcastStateChanged(superParent.getUsername(), superParent.getDevGroupName(), webDevState);
 		}
 	}
 

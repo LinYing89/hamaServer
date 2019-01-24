@@ -1,14 +1,23 @@
 package com.bairock.iot.hamaServer.communication;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bairock.iot.hamaServer.SpringUtil;
 import com.bairock.iot.hamaServer.repository.UserRepository;
+import com.bairock.iot.hamaServer.service.DeviceService;
 import com.bairock.iot.intelDev.communication.DevChannelBridgeHelper;
+import com.bairock.iot.intelDev.device.CtrlModel;
+import com.bairock.iot.intelDev.device.DevHaveChild;
+import com.bairock.iot.intelDev.device.DevStateHelper;
 import com.bairock.iot.intelDev.device.Device;
 import com.bairock.iot.intelDev.device.Gear;
 import com.bairock.iot.intelDev.device.OrderHelper;
+import com.bairock.iot.intelDev.device.devcollect.DevCollect;
+import com.bairock.iot.intelDev.device.devswitch.SubDev;
 import com.bairock.iot.intelDev.user.DevGroup;
 import com.bairock.iot.intelDev.user.User;
 
@@ -24,11 +33,19 @@ public class PadChannelBridge {
 
 	private Channel channel;
 	private UserRepository userRepository = SpringUtil.getBean(UserRepository.class);
+	private DeviceService deviceService = SpringUtil.getBean(DeviceService.class);
+	private MyOnCurrentValueChangedListener myOnCurrentValueChangedListener;
+	private MyOnStateChangedListener myOnStateChangedListener;
+	private MyOnGearChangedListener myOnGearChangedListener;
+	private MyOnCtrlModelChangedListener myOnCtrlModelChangedListener;
+	
 	private String userName="";
 	private String groupName="";
 	//是否需要向pad同步, true为需要, 当pad端无设备连接时, 为true, 当pad端有设备连接时为false, pad通过协议设置
 	public boolean synable = true;
-	private DevGroup devGroup;
+//	private DevGroup devGroup;
+	//持有设备
+	private List<Device> listDevice = new ArrayList<>();
 	private String channelId;
 	// the channel have no response count,0 if have response
 	private int noReponse;
@@ -38,6 +55,13 @@ public class PadChannelBridge {
 	private OnPadConnectedListener onPadConnectedListener;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	public PadChannelBridge() {
+		myOnCurrentValueChangedListener = SpringUtil.getBean(MyOnCurrentValueChangedListener.class);
+		myOnStateChangedListener = SpringUtil.getBean(MyOnStateChangedListener.class);
+		myOnGearChangedListener = SpringUtil.getBean(MyOnGearChangedListener.class);
+		myOnCtrlModelChangedListener = SpringUtil.getBean(MyOnCtrlModelChangedListener.class);
+	}
 	
 	public String getUserName() {
 		return userName;
@@ -61,6 +85,14 @@ public class PadChannelBridge {
 
 	public void setChannelId(String channelId) {
 		this.channelId = channelId;
+	}
+
+	public List<Device> getListDevice() {
+		return listDevice;
+	}
+
+	public void setListDevice(List<Device> listDevice) {
+		this.listDevice = listDevice;
 	}
 
 	public void setOnPadConnectedListener(OnPadConnectedListener onPadConnectedListener) {
@@ -173,10 +205,34 @@ public class PadChannelBridge {
 			if (msg.startsWith("I")) {
 				if (userName != null && groupName != null) {
 					sendToOtherClient(msg);
+					analysisIMsg(msg);
 				}
-				analysisIMsg(msg);
 			}
 		}
+	}
+	
+	private Device findDevice(String coding, List<Device> listDevice) {
+		Device dev = null;
+		for(Device d : listDevice) {
+			if(d.getCoding().equals(coding)) {
+				dev = d;
+				break;
+			}else if(d instanceof DevHaveChild){
+				findDevice(coding, ((DevHaveChild) d).getListDev());
+			}
+		}
+		return dev;
+	}
+	
+	private void addDeviceToList(Device dev) {
+		dev.setUsername(userName);
+		dev.setDevGroupName(groupName);
+		listDevice.add(dev);
+//		if(dev instanceof DevHaveChild) {
+//			for(Device d : ((DevHaveChild) dev).getListDev()) {
+//				addDeviceToList(d);
+//			}
+//		}
 	}
 
 	private void analysisIMsg(String msg) {
@@ -186,27 +242,67 @@ public class PadChannelBridge {
 		
 		String cutMsg = msg.substring(1, msg.indexOf("#"));
 		int index = cutMsg.indexOf(":");
-		if(this.devGroup == null) {
+		String coding = cutMsg.substring(0, index);
+		Device dev = findDevice(coding, listDevice);
+		if(null == dev) {
 			User user = userRepository.findByName(userName);
 			DevGroup group = user.findDevGroupByName(groupName);
-			this.devGroup = group;
-		}
-		if (null != devGroup) {
-			String coding = cutMsg.substring(0, index);
-			Device dev = devGroup.findDeviceWithCoding(coding);
-			if(null == dev) {
+			Device d = group.findDeviceWithCoding(coding);
+			if(null == d) {
 				return;
 			}
-//			if(dev.getOnGearChanged() == null) {
-//				dev.setOnGearChanged(new MyOnGearChangedListener());
-//			}
+			if(d.getParent() != null) {
+				Device parent = d.findSuperParent();
+				parent = deviceService.findById(parent.getId());
+				//只需将父设备添加到集合, 寻找子设备时会遍历父设备的子设备集合
+				addDeviceToList(parent);
+				setDeviceListener(parent);
+			}else {
+				//重新获取缓存中的数据, 使系统中设备对象唯一
+				d = deviceService.findById(d.getId());
+				addDeviceToList(d);
+				setDeviceListener(d);
+			}
+			//重新获取缓存中的数据, 使系统中设备对象唯一
+			dev = findDevice(coding, listDevice);
 			
-			String state = cutMsg.substring(index + 1);
-			if (state.startsWith("b")) {
-				// gear
-				String stateHead = cutMsg.substring(index + 2);
-				dev.setGear(Enum.valueOf(Gear.class, stateHead));
-			} 
+		}
+		String state = cutMsg.substring(index + 1);
+		if (state.startsWith("b")) {
+			// gear
+			String stateHead = cutMsg.substring(index + 2);
+			dev.setGear(Enum.valueOf(Gear.class, stateHead));
+		}else if(state.startsWith("2")) {
+			String s1 = state.substring(1,2);
+			if(s1.equals(DevStateHelper.getIns().getDs(DevStateHelper.DS_YI_CHANG))) {
+				dev.setDevStateId(DevStateHelper.DS_YI_CHANG);
+			}
+		}else {
+			dev.setCtrlModel(CtrlModel.LOCAL);
+			dev.handle(state);
+		}
+	}
+	
+	private void setDeviceListener(Device device) {
+		device.setCtrlModel(CtrlModel.UNKNOW);
+		device.setDevStateId(DevStateHelper.DS_YI_CHANG);
+		if(device.getStOnStateChangedListener().isEmpty()) {
+			device.addOnStateChangedListener(myOnStateChangedListener);
+		}
+		if(device.getStOnCtrlModelChanged().isEmpty()) {
+			device.addOnCtrlModelChangedListener(myOnCtrlModelChangedListener);
+		}
+		if(device instanceof DevCollect) {
+			DevCollect dc = (DevCollect)device;
+			dc.getCollectProperty().addOnCurrentValueChangedListener(myOnCurrentValueChangedListener);
+//			dc.getCollectProperty().initTriggerListener();
+		}else if(device instanceof SubDev) {
+			device.addOnGearChangedListener(myOnGearChangedListener);
+		}
+		if (device instanceof DevHaveChild) {
+			for (Device device1 : ((DevHaveChild) device).getListDev()) {
+				setDeviceListener(device1);
+			}
 		}
 	}
 	

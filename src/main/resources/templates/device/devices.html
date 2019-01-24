@@ -105,7 +105,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr th:each="dev : ${listDevCollect}" 
+						<tr th:each="dev : ${listDevValue}" 
 							th:id="|tr-${dev.longCoding}|"
 							th:data-state="${dev.devStateId}">
 							<td th:text="${dev.name}">设备名</td>

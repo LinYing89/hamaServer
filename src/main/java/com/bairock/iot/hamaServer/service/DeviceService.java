@@ -3,6 +3,7 @@ package com.bairock.iot.hamaServer.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import com.bairock.iot.hamaServer.data.webData.WebDevGear;
 import com.bairock.iot.hamaServer.data.webData.WebDevState;
 import com.bairock.iot.hamaServer.data.webData.WebDevValue;
 import com.bairock.iot.hamaServer.repository.DeviceRepo;
+import com.bairock.iot.intelDev.device.DevHaveChild;
 import com.bairock.iot.intelDev.device.Device;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,10 +25,29 @@ public class DeviceService {
 	
 	@Autowired
 	private DeviceRepo deviceRepo;
+	@Autowired
+	private CacheManager cacheManager;
 	
-	@Cacheable(value="device", key="#devGroupId + ':' + #id")
-	public Device findByDevGroupIdAndId(String devGroupId, String id) {
-		return deviceRepo.findByDevGroupIdAndId(devGroupId, id);
+	@Cacheable(value="device", key="#id")
+	public Device findById(String id) {
+		Device dev = deviceRepo.findById(id).orElse(null);
+		if(null != dev) {
+			setDeviceToCache(dev);
+		}
+		return dev;
+	}
+	
+	//将设备和其子设备添加到缓存
+	private void setDeviceToCache(Device dev) {
+		if(null == dev) {
+			return;
+		}
+		cacheManager.getCache("device").put(dev.getId(), dev);
+		if(dev instanceof DevHaveChild) {
+			for(Device d : ((DevHaveChild) dev).getListDev()) {
+				setDeviceToCache(d);
+			}
+		}
 	}
 
 	public List<Device> findDeviceByDevGroupId(String devGroupId){

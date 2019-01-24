@@ -5,6 +5,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Component;
 
 import com.bairock.iot.hamaServer.communication.PadChannelBridgeHelper;
+import com.bairock.iot.hamaServer.data.webData.WebDevCtrlModel;
 import com.bairock.iot.hamaServer.data.webData.WebDevGear;
 import com.bairock.iot.hamaServer.data.webData.WebDevState;
 import com.bairock.iot.hamaServer.data.webData.WebDevValue;
@@ -29,7 +30,7 @@ public class DeviceBroadcastService {
      */
     //topic/userName-devGroupName/devState
     public void broadcastStateChanged(String userName, String devGroupName, WebDevState webDevState){
-    	String topic = String.format("/topic/%s-%s/devState", userName, devGroupName);
+    	String topic = String.format("/topic/%s:%s/devState", userName, devGroupName);
         messaging.convertAndSend(topic, webDevState);
         
         //发往pad
@@ -52,6 +53,11 @@ public class DeviceBroadcastService {
     public void broadcastGearChanged(String userName, String devGroupName, WebDevGear webDevGear){
     	String topic = String.format("/topic/%s-%s/devGear", userName, devGroupName);
         messaging.convertAndSend(topic, webDevGear);
+    }
+    
+    public void broadcastCtrlModelChanged(String userName, String devGroupName, WebDevCtrlModel webDevCtrlModel){
+    	String topic = String.format("/topic/%s-%s/devCtrlModel", userName, devGroupName);
+        messaging.convertAndSend(topic, webDevCtrlModel);
     }
     
     /**
