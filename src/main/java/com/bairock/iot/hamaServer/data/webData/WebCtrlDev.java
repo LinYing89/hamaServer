@@ -8,8 +8,7 @@ package com.bairock.iot.hamaServer.data.webData;
 public class WebCtrlDev {
 
 	private String longCoding;
-	//动作, 1开, 0关, 2停
-	private int action;
+	private String stateId;
 	
 	public String getLongCoding() {
 		return longCoding;
@@ -17,12 +16,10 @@ public class WebCtrlDev {
 	public void setLongCoding(String longCoding) {
 		this.longCoding = longCoding;
 	}
-	public int getAction() {
-		return action;
+	public String getStateId() {
+		return stateId;
 	}
-	public void setAction(int action) {
-		this.action = action;
+	public void setStateId(String stateId) {
+		this.stateId = stateId;
 	}
-	
-	
 }

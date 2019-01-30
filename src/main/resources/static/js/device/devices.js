@@ -29,28 +29,40 @@ $(document).ready(function() {
 	
 	// 开按钮
 	$('.btn-on-dev').click(function() {
-		ctrlClick(this.getAttribute("data-long-coding"), 1);
+		ctrlClick($(this).data("dev-id"), $(this).data("long-coding"), 1);
 	});
 
 	// 自动按钮
 	$('.btn-auto-dev').click(function() {
-		ctrlClick(this.getAttribute("data-long-coding"), 2);
+		ctrlClick($(this).data("dev-id"), $(this).data("long-coding"), 2);
 	});
 
 	// 关按钮
 	$('.btn-off-dev').click(function() {
-		ctrlClick(this.getAttribute("data-long-coding"), 0);
+		ctrlClick($(this).data("dev-id"), $(this).data("long-coding"), 0);
 	});
 });
 
-function ctrlClick(longCoding, action) {
-	stompClient.send("/app/ctrlDev", {}, JSON.stringify({
-		'userName' : userName,
-		'devGroupName' : devGroupName,
-		'data' : {
-			'longCoding' : longCoding,
-			'action' : action
+function ctrlClick(devId, longCoding, action) {
+	var orderType;
+	var data;
+	if(action == 2){
+		orderType = 'GEAR';
+	}else{
+		orderType = "CTRL_DEV";
+		if(action == 0){
+			data = 'ds_g';
+		}else{
+			data = "ds_k";
 		}
+	}
+	stompClient.send("/app/ctrlDev", {}, JSON.stringify({
+		'devId' : devId,
+		'longCoding' : longCoding,
+		'orderType' : orderType,
+		'username' : userName,
+		'devGroupName' : devGroupName,
+		'data' : data
 	}));
 }
 
@@ -65,7 +77,7 @@ function initWebSocket() {
 			'devGroupName' : devGroupName
 		}));
 
-		var userInfo = userName + "-" + devGroupName;
+		var userInfo = userName + ":" + devGroupName;
 		var topicDevState = '/topic/' + userInfo + '/devState'
 		stompClient.subscribe(topicDevState, handlerDevState);
 		var topicDevGear = '/topic/' + userInfo + '/devGear'

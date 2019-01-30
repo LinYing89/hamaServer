@@ -1,5 +1,6 @@
 package com.bairock.iot.hamaServer.communication;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.bairock.iot.hamaServer.SpringUtil;
 import com.bairock.iot.hamaServer.repository.UserRepository;
 import com.bairock.iot.hamaServer.service.DeviceService;
+import com.bairock.iot.intelDev.communication.DevChannelBridge;
 import com.bairock.iot.intelDev.communication.DevChannelBridgeHelper;
 import com.bairock.iot.intelDev.device.CtrlModel;
 import com.bairock.iot.intelDev.device.DevHaveChild;
@@ -18,8 +20,15 @@ import com.bairock.iot.intelDev.device.Gear;
 import com.bairock.iot.intelDev.device.OrderHelper;
 import com.bairock.iot.intelDev.device.devcollect.DevCollect;
 import com.bairock.iot.intelDev.device.devswitch.SubDev;
+import com.bairock.iot.intelDev.order.DeviceOrder;
+import com.bairock.iot.intelDev.order.OrderBase;
+import com.bairock.iot.intelDev.order.OrderType;
 import com.bairock.iot.intelDev.user.DevGroup;
 import com.bairock.iot.intelDev.user.User;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -100,21 +109,99 @@ public class PadChannelBridge {
 	}
 
 	public void channelReceived(String msg) {
-		logger.info(" userName:" + userName + " groupName:" + groupName + " msg:" + msg);
-		
-//		WebDevGear webDevState = new WebDevGear("B39999_0_1", Integer.parseInt(msg));
-//		deviceService.broadcastGearChanged("test123", "1", webDevState);
-		
+		logger.info("channelReceived userName:" + userName + " groupName:" + groupName + " msg:" + msg);
 		noReponse = 0;
-		sbReceived.append(msg);
-		//System.out.println(sbReceived.length() + "?");
-		if(judgeMsgFormate(sbReceived.toString())){
-			displayMsg(sbReceived.toString());
-			sbReceived.setLength(0);
-		}else if(sbReceived.length() >= 20000) {
-			sbReceived.setLength(0);
+		
+    	try {
+    		ObjectMapper om = new ObjectMapper();
+    		DeviceOrder orderBase = om.readValue(msg, DeviceOrder.class);
+//			OrderBase ob = new OrderBase();
+			DeviceOrder devOrder = null;
+			switch(orderBase.getOrderType()) {
+			case HEAD_USER_INFO : 
+				userName = orderBase.getUsername();
+				groupName = orderBase.getDevGroupName();
+				if(null != onPadConnectedListener) {
+					onPadConnectedListener.onPadConnected(userName, groupName);
+				}
+				break;
+			case GEAR : 
+				if (userName != null && groupName != null) {
+					sendToOtherClient(msg);
+					devOrder = (DeviceOrder)orderBase;
+					Device dev = findDevByCoding(devOrder.getLongCoding());
+					if(null == dev) {
+						return;
+					}
+					dev.setGear(Gear.valueOf(orderBase.getData()));
+				}
+				break;
+			case CTRL_DEV:
+				devOrder = (DeviceOrder)orderBase;
+				Device dev = findDevByCoding(devOrder.getLongCoding());
+				DevChannelBridge db = MyDevChannelBridge.findDevChannelBridge(dev.getLongCoding(), userName, groupName);
+//				DevChannelBridge db = MyDevChannelBridge.findBridge(dev, userName, groupName);
+//				DevChannelBridge db = findDevChannelBridge(devOrder.getLongCoding());
+				if(null == db) {
+					return;
+				}
+				db.sendOrder(orderBase.getData());
+				break;
+			case STATE:
+				devOrder = (DeviceOrder)orderBase;
+				dev = findDevByCoding(devOrder.getLongCoding());
+				if(null == dev) {
+					return;
+				}
+				dev.setCtrlModel(CtrlModel.LOCAL);
+				dev.setDevStateId(orderBase.getData());
+				break;
+			case VALUE:
+				devOrder = (DeviceOrder)orderBase;
+				dev = findDevByCoding(devOrder.getLongCoding());
+				if(null == dev || !(dev instanceof DevCollect)) {
+					return;
+				}
+				dev.setCtrlModel(CtrlModel.LOCAL);
+				((DevCollect)dev).getCollectProperty().setCurrentValue(Float.parseFloat(orderBase.getData()));
+				break;
+			default:
+				break;
+			}
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
+		
+//		sbReceived.append(msg);
+//		//System.out.println(sbReceived.length() + "?");
+//		if(judgeMsgFormate(sbReceived.toString())){
+//			displayMsg(sbReceived.toString());
+//			sbReceived.setLength(0);
+//		}else if(sbReceived.length() >= 20000) {
+//			sbReceived.setLength(0);
+//		}
 	}
+	
+//	public DevChannelBridge findDevChannelBridge(String devCoding) {
+//		for (DevChannelBridge bridge : DevChannelBridgeHelper.getIns().getListDevChannelBridge()) {
+//			MyDevChannelBridge db = (MyDevChannelBridge)bridge;
+//			if(db.getDevice() != null && db.getUserName().equals(userName) && db.getGroupName().equals(groupName)){
+//				if(db.findDeviceByLongCoding(devCoding, db.getDevice()) != null) {
+//					return db;
+//				}
+//			}
+//		}
+//		return null;
+//	}
 	
 	public boolean judgeMsgFormate(String msg) {
 		boolean formatOk = false;
@@ -129,12 +216,21 @@ public class PadChannelBridge {
 	}
 
 	public String getHeart() {
-		String heart;
+		String heart = "";
+		ObjectMapper om = new ObjectMapper();
+		OrderBase ob = new OrderBase();
 		//
-		if (userName == null || groupName == null) {
-			heart = OrderHelper.getOrderMsg("h2");
+		if (userName == null || groupName == null || userName.isEmpty() || groupName.isEmpty()) {
+			ob.setOrderType(OrderType.HEAD_USER_INFO);
 		} else {
-			heart = OrderHelper.getOrderMsg("h3");
+//			ob.setOrderType(OrderType.HEAD_NOT_SYN);
+			ob.setOrderType(OrderType.HEAD_SYN);
+		}
+		try {
+			heart = om.writeValueAsString(ob);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return heart;
 	}
@@ -191,8 +287,9 @@ public class PadChannelBridge {
 					synable = true;
 				}
 			}
-			//配置远程和本地, 废弃
+			
 		} else if (msg.startsWith("C")) {
+			//配置远程和本地
 			if (!msg.contains("#") || !msg.contains(":")) {
 				return;
 			}
@@ -214,11 +311,14 @@ public class PadChannelBridge {
 	private Device findDevice(String coding, List<Device> listDevice) {
 		Device dev = null;
 		for(Device d : listDevice) {
-			if(d.getCoding().equals(coding)) {
+			if(d.getLongCoding().equals(coding)) {
 				dev = d;
 				break;
 			}else if(d instanceof DevHaveChild){
-				findDevice(coding, ((DevHaveChild) d).getListDev());
+				dev = findDevice(coding, ((DevHaveChild) d).getListDev());
+				if(null != dev) {
+					break;
+				}
 			}
 		}
 		return dev;
@@ -233,6 +333,34 @@ public class PadChannelBridge {
 //				addDeviceToList(d);
 //			}
 //		}
+	}
+	
+	private Device findDevByCoding(String coding) {
+		Device dev = findDevice(coding, listDevice);
+		if(null == dev) {
+			User user = userRepository.findByName(userName);
+			DevGroup group = user.findDevGroupByName(groupName);
+			Device d = group.findDeviceWithCoding(coding);
+			if(null == d) {
+				return null;
+			}
+			if(d.getParent() != null) {
+				Device parent = d.findSuperParent();
+				parent = deviceService.findById(parent.getId());
+				//只需将父设备添加到集合, 寻找子设备时会遍历父设备的子设备集合
+				addDeviceToList(parent);
+				setDeviceListener(parent);
+			}else {
+				//重新获取缓存中的数据, 使系统中设备对象唯一
+				d = deviceService.findById(d.getId());
+				addDeviceToList(d);
+				setDeviceListener(d);
+			}
+			//重新获取缓存中的数据, 使系统中设备对象唯一
+			dev = findDevice(coding, listDevice);
+			
+		}
+		return dev;
 	}
 
 	private void analysisIMsg(String msg) {
@@ -337,13 +465,18 @@ public class PadChannelBridge {
 	}
 
 	public void sendMessage(String msg) {
-		logger.info(" userName:" + userName + " groupName:" + groupName + " msg:" + msg);
+		logger.info(" sendMessage userName:" + userName + " groupName:" + groupName + " msg:" + msg);
+		if(null == getChannel()) {
+			return;
+		}
 		if (noReponse > 2) {
 			channel.close();
 			PadChannelBridgeHelper.getIns().removeBridge(this);
 		}else {
 			noReponse++;
-			getChannel().writeAndFlush(Unpooled.copiedBuffer(msg.getBytes()));
+			if(null != getChannel()) {
+				getChannel().writeAndFlush(Unpooled.copiedBuffer(msg.getBytes()));
+			}
 		}
 	}
 	

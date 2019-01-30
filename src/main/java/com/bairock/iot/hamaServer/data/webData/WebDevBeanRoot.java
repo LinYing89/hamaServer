@@ -2,10 +2,19 @@ package com.bairock.iot.hamaServer.data.webData;
 
 public class WebDevBeanRoot<T> {
 
+	private String devId;
 	private String userName;
 	private String devGroupName;
 	
 	private T data;
+
+	public String getDevId() {
+		return devId;
+	}
+
+	public void setDevId(String devId) {
+		this.devId = devId;
+	}
 
 	public String getUserName() {
 		return userName;

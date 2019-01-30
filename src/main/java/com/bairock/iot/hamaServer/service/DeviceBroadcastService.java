@@ -34,14 +34,14 @@ public class DeviceBroadcastService {
         messaging.convertAndSend(topic, webDevState);
         
         //发往pad
-        ObjectMapper mapper = new ObjectMapper();
-		try {
-			String order;
-			order = mapper.writeValueAsString(webDevState);
-			PadChannelBridgeHelper.getIns().sendOrderSynable(userName, devGroupName, order);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
+//        ObjectMapper mapper = new ObjectMapper();
+//		try {
+//			String order;
+//			order = mapper.writeValueAsString(webDevState);
+//			PadChannelBridgeHelper.getIns().sendOrderSynable(userName, devGroupName, order);
+//		} catch (JsonProcessingException e) {
+//			e.printStackTrace();
+//		}
     }
     
     /**

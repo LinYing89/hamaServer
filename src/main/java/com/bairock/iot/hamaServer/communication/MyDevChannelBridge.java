@@ -24,8 +24,8 @@ public class MyDevChannelBridge extends DevChannelBridge {
 	private UserRepository userRepository;
 	private DeviceService deviceService;
 
-	private String userName;
-	private String groupName;
+	private String userName = "";
+	private String groupName = "";
 
 	// 缓存收到的数据
 	StringBuilder sb = new StringBuilder();
@@ -180,7 +180,7 @@ public class MyDevChannelBridge extends DevChannelBridge {
 				}
 				this.userName = userName;
 				this.groupName = groupName;
-				
+				getDevice().setCtrlModel(CtrlModel.REMOTE);
 				setDeviceListener(getDevice());
 				
 				sendOrder(dev.createInitOrder());
@@ -202,6 +202,24 @@ public class MyDevChannelBridge extends DevChannelBridge {
 				}
 			}
 		}
+	}
+	
+	public Device findDeviceByLongCoding(String coding, Device device) {
+		if(null == device) {
+			return null;
+		}
+		Device dev = null;
+		if(device.getLongCoding().equals(coding)) {
+			return device;
+		}else if(device instanceof DevHaveChild){
+			for(Device dd : ((DevHaveChild) device).getListDev()) {
+				dev = findDeviceByLongCoding(coding, dd);
+				if(null != dev) {
+					return dev;
+				}
+			}
+		}
+		return dev;
 	}
 
 	private void setDeviceToZhangChang(Device dev) {
@@ -263,7 +281,7 @@ public class MyDevChannelBridge extends DevChannelBridge {
 //		}
 //	}
 
-	public static MyDevChannelBridge findBridge(Device device) {
+	public static MyDevChannelBridge findBridge(Device device, String username, String devGroupName) {
 //		if(null == device || null == device.findSuperParent().getDevGroup() || null == device.findSuperParent().getDevGroup().getUser()) {
 //			return null;
 //		}
@@ -274,6 +292,18 @@ public class MyDevChannelBridge extends DevChannelBridge {
 				groupName);
 		if (null != d) {
 			return (MyDevChannelBridge) d;
+		}
+		return null;
+	}
+	
+	public static DevChannelBridge findDevChannelBridge(String devCoding, String username, String groupName) {
+		for (DevChannelBridge bridge : DevChannelBridgeHelper.getIns().getListDevChannelBridge()) {
+			MyDevChannelBridge db = (MyDevChannelBridge)bridge;
+			if(db.getDevice() != null && db.getUserName().equals(username) && db.getGroupName().equals(groupName)){
+				if(db.findDeviceByLongCoding(devCoding, db.getDevice()) != null) {
+					return db;
+				}
+			}
 		}
 		return null;
 	}

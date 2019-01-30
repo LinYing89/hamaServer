@@ -74,15 +74,15 @@
 							<td>
 								<div class="btn-group btn-group-sm" role="group">
 									<button th:id="|btn-on-${dev.longCoding}|" 
-										th:data-long-coding="${dev.longCoding}"
+										th:attr="data-dev-id=${dev.id}, data-long-coding=${dev.longCoding}"
 										type="button"
 										class="btn btn-outline-secondary btn-on-dev active">开</button>
 									<button th:id="|btn-auto-${dev.longCoding}|" 
-										th:data-long-coding="${dev.longCoding}"
+										th:attr="data-dev-id=${dev.id}, data-long-coding=${dev.longCoding}"
 										type="button"
 										class="btn btn-outline-secondary btn-auto-dev">自动</button>
 									<button th:id="|btn-off-${dev.longCoding}|" 
-										th:data-long-coding="${dev.longCoding}"
+										th:attr="data-dev-id=${dev.id}, data-long-coding=${dev.longCoding}"
 										type="button"
 										class="btn btn-outline-secondary btn-off-dev">关</button>
 								</div>

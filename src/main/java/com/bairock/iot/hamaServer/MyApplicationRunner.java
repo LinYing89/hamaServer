@@ -2,8 +2,10 @@ package com.bairock.iot.hamaServer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
 
 import com.bairock.iot.hamaServer.communication.MyDevChannelBridge;
 import com.bairock.iot.hamaServer.communication.MyOnPadDisconnectedListener;
@@ -13,10 +15,12 @@ import com.bairock.iot.hamaServer.data.Config;
 import com.bairock.iot.intelDev.communication.DevChannelBridgeHelper;
 import com.bairock.iot.intelDev.communication.DevServer;
 
+@Component
 public class MyApplicationRunner implements ApplicationRunner {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	private Config config = SpringUtil.getBean(Config.class);
+	@Autowired
+	private Config config;
 	
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
