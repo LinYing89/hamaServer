@@ -24,16 +24,19 @@ public class PadHandler extends ChannelInboundHandlerAdapter{
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		ByteBuf m = (ByteBuf)msg;
-		try{
-			byte[] req = new byte[m.readableBytes()];
-			m.readBytes(req);
-			String str = new String(req, "GBK");
-			PadChannelBridgeHelper.getIns().channelReceived(ctx.channel().id().asShortText(), str);
-		}finally{
-			m.release();
-//			ReferenceCountUtil.release(msg);
-		}
+		String str = (String)msg;
+		PadChannelBridgeHelper.getIns().channelReceived(ctx.channel().id().asShortText(), str);
+		
+//		ByteBuf m = (ByteBuf)msg;
+//		try{
+//			byte[] req = new byte[m.readableBytes()];
+//			m.readBytes(req);
+//			String str = new String(req, "GBK");
+//			PadChannelBridgeHelper.getIns().channelReceived(ctx.channel().id().asShortText(), str);
+//		}finally{
+//			m.release();
+////			ReferenceCountUtil.release(msg);
+//		}
 	}
 
 	@Override

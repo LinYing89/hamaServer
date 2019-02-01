@@ -452,14 +452,14 @@ public class PadChannelBridge {
 
 	public void sendToAllClient(String msg) {
 		for (PadChannelBridge pcb : PadChannelBridgeHelper.getIns().getListPadChannelBridge(userName, groupName)) {
-			pcb.sendMessage("$" + msg);
+			pcb.sendMessage(msg);
 		}
 	}
 
 	public void sendToOtherClient(String msg) {
 		for (PadChannelBridge pcb : PadChannelBridgeHelper.getIns().getListPadChannelBridge(userName, groupName)) {
 			if (pcb != this) {
-				pcb.sendMessageNotReponse("$" + msg);
+				pcb.sendMessageNotReponse(msg);
 			}
 		}
 	}
@@ -475,14 +475,21 @@ public class PadChannelBridge {
 		}else {
 			noReponse++;
 			if(null != getChannel()) {
-				getChannel().writeAndFlush(Unpooled.copiedBuffer(msg.getBytes()));
+				send(msg);
+//				getChannel().writeAndFlush(Unpooled.copiedBuffer(msg.getBytes()));
 			}
 		}
 	}
 	
 	public void sendMessageNotReponse(String msg) {
 		logger.info(" userName:" + userName + " groupName:" + groupName + " msg:" + msg);
-	    getChannel().writeAndFlush(Unpooled.copiedBuffer(msg.getBytes()));
+		send(msg);
+//	    getChannel().writeAndFlush(Unpooled.copiedBuffer(msg.getBytes()));
+	}
+	
+	private void send(String msg) {
+		msg = msg + System.getProperty("line.separator");
+		getChannel().writeAndFlush(Unpooled.copiedBuffer(msg.getBytes()));
 	}
 	
 	public interface OnPadConnectedListener {

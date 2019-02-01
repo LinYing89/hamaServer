@@ -4,13 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Component;
 
-import com.bairock.iot.hamaServer.communication.PadChannelBridgeHelper;
 import com.bairock.iot.hamaServer.data.webData.WebDevCtrlModel;
 import com.bairock.iot.hamaServer.data.webData.WebDevGear;
 import com.bairock.iot.hamaServer.data.webData.WebDevState;
 import com.bairock.iot.hamaServer.data.webData.WebDevValue;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class DeviceBroadcastService {
@@ -51,12 +48,12 @@ public class DeviceBroadcastService {
      * @param webDevGear
      */
     public void broadcastGearChanged(String userName, String devGroupName, WebDevGear webDevGear){
-    	String topic = String.format("/topic/%s-%s/devGear", userName, devGroupName);
+    	String topic = String.format("/topic/%s:%s/devGear", userName, devGroupName);
         messaging.convertAndSend(topic, webDevGear);
     }
     
     public void broadcastCtrlModelChanged(String userName, String devGroupName, WebDevCtrlModel webDevCtrlModel){
-    	String topic = String.format("/topic/%s-%s/devCtrlModel", userName, devGroupName);
+    	String topic = String.format("/topic/%s:%s/devCtrlModel", userName, devGroupName);
         messaging.convertAndSend(topic, webDevCtrlModel);
     }
     
@@ -67,7 +64,7 @@ public class DeviceBroadcastService {
      * @param webDevValue
      */
     public void broadcastValueChanged(String userName, String devGroupName, WebDevValue webDevValue){
-    	String topic = String.format("/topic/%s-%s/devValue", userName, devGroupName);
+    	String topic = String.format("/topic/%s:%s/devValue", userName, devGroupName);
         messaging.convertAndSend(topic, webDevValue);
     }
 }

@@ -74,17 +74,20 @@
 							<td>
 								<div class="btn-group btn-group-sm" role="group">
 									<button th:id="|btn-on-${dev.longCoding}|" 
+										class="btn btn-outline-secondary btn-on-dev"
+										th:classappend="${dev.gear.toString() == 'KAI'} ? 'active'"
 										th:attr="data-dev-id=${dev.id}, data-long-coding=${dev.longCoding}"
-										type="button"
-										class="btn btn-outline-secondary btn-on-dev active">开</button>
+										type="button">开</button>
 									<button th:id="|btn-auto-${dev.longCoding}|" 
+										class="btn btn-outline-secondary btn-auto-dev"
+										th:classappend="${dev.gear.toString() == 'ZIDONG'} ? 'active'"
 										th:attr="data-dev-id=${dev.id}, data-long-coding=${dev.longCoding}"
-										type="button"
-										class="btn btn-outline-secondary btn-auto-dev">自动</button>
+										type="button">自动</button>
 									<button th:id="|btn-off-${dev.longCoding}|" 
+										class="btn btn-outline-secondary btn-off-dev" 
+										th:classappend="${dev.gear.toString() == 'GUAN'} ? 'active'"
 										th:attr="data-dev-id=${dev.id}, data-long-coding=${dev.longCoding}"
-										type="button"
-										class="btn btn-outline-secondary btn-off-dev">关</button>
+										type="button">关</button>
 								</div>
 							</td>
 							<td><a class="link dev" href="#" th:data-long-coding="${dev.longCoding}">

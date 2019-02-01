@@ -27,15 +27,12 @@ public class MyOnCurrentValueChangedListener implements OnCurrentValueChangedLis
 			// 通知网页
 			WebDevValue webDevValue = new WebDevValue(dev.getLongCoding(), dev.getCollectProperty().getCurrentValue());
 			deviceService.broadcastValueChanged(superParent.getUsername(), superParent.getDevGroupName(), webDevValue);
-			
-			//远程设备才发往本地, 本地设备状态在服务器收到之前已经到位了
+
+			// 远程设备才发往本地, 本地设备状态在服务器收到之前已经到位了
 			if (superParent.getCtrlModel() == CtrlModel.REMOTE) {
 				// 发送到pad
-				DeviceOrder devOrder = new DeviceOrder();
-				devOrder.setOrderType(OrderType.VALUE);
-				devOrder.setDevId(dev.getId());
-				devOrder.setLongCoding(dev.getLongCoding());
-				devOrder.setData(String.valueOf(value));
+				DeviceOrder devOrder = new DeviceOrder(OrderType.VALUE, dev.getId(), dev.getLongCoding(),
+						String.valueOf(value));
 				String strOrder = Util.orderBaseToString(devOrder);
 				PadChannelBridgeHelper.getIns().sendOrderSynable(superParent.getUsername(),
 						superParent.getDevGroupName(), strOrder);
