@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import com.bairock.iot.hamaServer.SpringUtil;
 import com.bairock.iot.hamaServer.repository.UserRepository;
 import com.bairock.iot.hamaServer.service.DeviceService;
+import com.bairock.iot.hamaServer.test.DeviceMsg;
+import com.bairock.iot.hamaServer.test.DeviceMsgTestService;
 import com.bairock.iot.intelDev.communication.DevChannelBridge;
 import com.bairock.iot.intelDev.communication.DevChannelBridgeHelper;
 import com.bairock.iot.intelDev.communication.MessageAnalysiser;
@@ -36,6 +38,8 @@ public class MyDevChannelBridge extends DevChannelBridge {
 	private MyOnStateChangedListener myOnStateChangedListener;
 	private MyOnGearChangedListener myOnGearChangedListener;
 	private MyOnCtrlModelChangedListener myOnCtrlModelChangedListener;
+	
+	private DeviceMsgTestService deviceMsgTestService;
 
 	public MyDevChannelBridge() {
 		userRepository = SpringUtil.getBean(UserRepository.class);
@@ -46,20 +50,26 @@ public class MyDevChannelBridge extends DevChannelBridge {
 		myOnGearChangedListener = SpringUtil.getBean(MyOnGearChangedListener.class);
 		myOnCtrlModelChangedListener = SpringUtil.getBean(MyOnCtrlModelChangedListener.class);
 		
+		deviceMsgTestService = SpringUtil.getBean(DeviceMsgTestService.class);
+		
 		setOnCommunicationListener(new OnCommunicationListener() {
 
 			@Override
 			public void onSend(DevChannelBridge bridge, String msg) {
-				String info = "1" + createUserInfo() + " -> msg:" + msg;
-				logger.info(info);
+//				String info = "1" + createUserInfo() + " -> msg:" + msg;
+//				logger.info(info);
 //				RemoteLogWebSocket.sendMessageToAll(info);
+				DeviceMsg dm = new DeviceMsg("send", msg);
+				deviceMsgTestService.broadcastDeviceMsg(dm);
 			}
 
 			@Override
 			public void onReceived(DevChannelBridge bridge, String msg) {
-				String info = "2" + createUserInfo() + " <- msg:" + msg;
-				logger.info(info);
+//				String info = "2" + createUserInfo() + " <- msg:" + msg;
+//				logger.info(info);
 //				RemoteLogWebSocket.sendMessageToAll(info);
+				DeviceMsg dm = new DeviceMsg("rec", msg);
+				deviceMsgTestService.broadcastDeviceMsg(dm);
 			}
 		});
 	}
@@ -80,17 +90,9 @@ public class MyDevChannelBridge extends DevChannelBridge {
 		this.groupName = groupName;
 	}
 
-	private String createUserInfo() {
-		String info = "u:";
-		info += (null == userName ? "" : userName);
-		info += "g:";
-		info += (null == groupName ? "" : groupName);
-		return info;
-	}
-
 	@Override
 	public void channelReceived(String msg, User user) {
-		logger.info(msg);
+//		logger.info(msg);
 
 		if (null != getOnCommunicationListener()) {
 			getOnCommunicationListener().onReceived(this, msg);
@@ -158,7 +160,15 @@ public class MyDevChannelBridge extends DevChannelBridge {
 
 			if (null != coding && null != userName && null != groupName) {
 				User user = userRepository.findByName(userName);
+				if(null == user) {
+					logger.error("no username : " + userName);
+					return;
+				}
 				DevGroup group = user.findDevGroupByName(groupName);
+				if(null == group) {
+					logger.error("no groupname : " + groupName);
+					return;
+				}
 				Device dev = group.findDeviceWithCoding(coding);
 				if (null == dev) {
 					return;
@@ -184,7 +194,7 @@ public class MyDevChannelBridge extends DevChannelBridge {
 				setDeviceListener(getDevice());
 				
 				sendOrder(dev.createInitOrder());
-				setDeviceToZhangChang(dev);
+				setDeviceToZhangChang(getDevice());
 				if (null != state) {
 					handleState(dev, state);
 				}
@@ -242,14 +252,15 @@ public class MyDevChannelBridge extends DevChannelBridge {
 	}
 	
 	private void setDeviceListener(Device device) {
-		device.setCtrlModel(CtrlModel.UNKNOW);
-		device.setDevStateId(DevStateHelper.DS_YI_CHANG);
+//		device.setCtrlModel(CtrlModel.UNKNOW);
 		if(device.getStOnStateChangedListener().isEmpty()) {
+			device.setDevStateId(DevStateHelper.DS_YI_CHANG);
 			device.addOnStateChangedListener(myOnStateChangedListener);
 		}
 		if(device.getStOnCtrlModelChanged().isEmpty()) {
 			device.addOnCtrlModelChangedListener(myOnCtrlModelChangedListener);
 		}
+		device.setCtrlModel(CtrlModel.REMOTE);
 		if(device instanceof DevCollect) {
 			DevCollect dc = (DevCollect)device;
 			dc.getCollectProperty().addOnCurrentValueChangedListener(myOnCurrentValueChangedListener);

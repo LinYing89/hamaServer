@@ -1,11 +1,5 @@
 package com.bairock.iot.hamaServer.communication;
 
-import com.bairock.iot.hamaServer.Util;
-import com.bairock.iot.intelDev.order.OrderBase;
-import com.bairock.iot.intelDev.order.OrderType;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -13,13 +7,13 @@ public class PadHandler extends ChannelInboundHandlerAdapter{
 	
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+		super.channelActive(ctx);
 		PadChannelBridge.channelGroup.add(ctx.channel());
 		PadChannelBridgeHelper.getIns().setChannelId(ctx.channel().id().asShortText());
-		OrderBase ob = new OrderBase();
-		ob.setOrderType(OrderType.HEAD_USER_INFO);
-		String order = Util.orderBaseToString(ob);
-		ctx.writeAndFlush(Unpooled.copiedBuffer(order.getBytes()));
-		super.channelActive(ctx);
+//		OrderBase ob = new OrderBase();
+//		ob.setOrderType(OrderType.HEAD_USER_INFO);
+//		String order = Util.orderBaseToString(ob);
+//		ctx.channel().writeAndFlush(Unpooled.copiedBuffer(order.getBytes()));
 	}
 
 	@Override

@@ -47,6 +47,9 @@ public class MyApplicationRunner implements ApplicationRunner {
 			logger.error("PadServer start error " + e.getMessage());
 		}
         logger.info("TcpServerServicer end");
+        
+//        DevChannelBridgeHelper.getIns().stopSeekDeviceOnLineThread();
+        DevChannelBridgeHelper.getIns().startSeekDeviceOnLineThread();
 	}
 
 }

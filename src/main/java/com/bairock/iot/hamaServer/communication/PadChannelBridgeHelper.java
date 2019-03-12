@@ -95,11 +95,13 @@ public class PadChannelBridgeHelper {
 		PadChannelBridge db = new PadChannelBridge();
 		db.setChannelId(channelId);
 		db.setOnPadConnectedListener(new MyOnPadConnectedListener());
+		db.sendHeart();
 		listPadChannelBridge.add(db);
 	}
 
 	public void removeBridge(PadChannelBridge db) {
 		listPadChannelBridge.remove(db);
+		db.close();
 		if(null != onPadDisconnectedListener && null != db) {
 			onPadDisconnectedListener.onPadDisconnected(db.getUserName(), db.getGroupName());
 		}

@@ -7,7 +7,7 @@
 	content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link rel="stylesheet"
 	href="/webjars/bootstrap/4.1.3/css/bootstrap.min.css">
-	<link rel="stylesheet" href="/css/root.css">
+<link rel="stylesheet" href="/css/root.css">
 <title>组设备</title>
 </head>
 
@@ -16,32 +16,26 @@
 <body>
 
 	<nav
-		class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow navbar-expand-sm">
-		<a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">智能物联网平台</a>
-		<button class="navbar-toggler" type="button" data-toggle="collapse"
-			data-target="#navbarSupportedContent"
-			aria-controls="navbarSupportedContent" aria-expanded="false"
-			aria-label="Toggle navigation">
-			<span class="navbar-toggler-icon"></span>
-		</button>
-		<div class="collapse navbar-collapse" id="navbarSupportedContent">
-			<div class="w-100"></div>
-			<ul class="navbar-nav px-3">
-				<li id="li-devgroup-info" class="nav-item dropdown text-nowrap" th:attr="data-username=${username}, data-devgroup-name=${devGroupName}"><a
-					class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
-					role="button" data-toggle="dropdown" aria-haspopup="true"
-					aria-expanded="false" th:text="|${username}-${devGroupName}:${devGroupPetName}|"> admin </a>
-					<div class="dropdown-menu dropdown-menu-right"
-						aria-labelledby="navbarDropdown">
-						<a class="dropdown-item" href="#">个人资料</a> 
-						<form action="#" th:action="@{/logout}" method="post">
-							<button type="submit" class="dropdown-item btn btn-link">退出</button>
-						</form>
-					</div></li>
-			</ul>
-		</div>
-
+		class="navbar navbar-expand-sm navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+		<a class="navbar-brand col-auto mr-auto" href="#">智能物联网平台</a>
+		<ul class="navbar-nav px-3">
+			<li id="li-devgroup-info" class="nav-item dropdown text-nowrap"
+				th:attr="data-username=${username}, data-devgroup-name=${devGroupName}"><a
+				class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+				role="button" data-toggle="dropdown" aria-haspopup="true"
+				aria-expanded="false"
+				th:text="|${username}-${devGroupName}:${devGroupPetName}|">
+					admin </a>
+				<div class="dropdown-menu dropdown-menu-right"
+					aria-labelledby="navbarDropdown">
+					<a sec:authorize="hasRole('ROLE_USER')" class="dropdown-item" href="#">个人资料</a>
+					<form action="#" th:action="@{/logout}" method="post">
+						<button type="submit" class="dropdown-item btn btn-link">退出</button>
+					</form>
+				</div></li>
+		</ul>
 	</nav>
+	
 	<div class="container mt-5" role="main">
 		<nav>
 			<div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -63,35 +57,39 @@
 						<tr>
 							<th scope="col">名称</th>
 							<th scope="col">操作</th>
+							<th scope="col">控制模式</th>
 						</tr>
 					</thead>
 					<tbody>
 
-						<tr th:each="dev : ${listDevState}" 
-							th:id="|tr-${dev.longCoding}|"
+						<tr th:each="dev : ${listDevState}" th:id="|tr-${dev.longCoding}|"
 							th:data-state="${dev.devStateId}">
 							<td th:text="${dev.name}">设备名</td>
 							<td>
 								<div class="btn-group btn-group-sm" role="group">
-									<button th:id="|btn-on-${dev.longCoding}|" 
+									<button th:id="|btn-on-${dev.longCoding}|"
 										class="btn btn-outline-secondary btn-on-dev"
 										th:classappend="${dev.gear.toString() == 'KAI'} ? 'active'"
 										th:attr="data-dev-id=${dev.id}, data-long-coding=${dev.longCoding}"
 										type="button">开</button>
-									<button th:id="|btn-auto-${dev.longCoding}|" 
+									<button th:id="|btn-auto-${dev.longCoding}|"
 										class="btn btn-outline-secondary btn-auto-dev"
 										th:classappend="${dev.gear.toString() == 'ZIDONG'} ? 'active'"
 										th:attr="data-dev-id=${dev.id}, data-long-coding=${dev.longCoding}"
 										type="button">自动</button>
-									<button th:id="|btn-off-${dev.longCoding}|" 
-										class="btn btn-outline-secondary btn-off-dev" 
+									<button th:id="|btn-off-${dev.longCoding}|"
+										class="btn btn-outline-secondary btn-off-dev"
 										th:classappend="${dev.gear.toString() == 'GUAN'} ? 'active'"
 										th:attr="data-dev-id=${dev.id}, data-long-coding=${dev.longCoding}"
 										type="button">关</button>
 								</div>
 							</td>
-							<td><a class="link dev" href="#" th:data-long-coding="${dev.longCoding}">
-									<span data-feather="bar-chart"></span>
+							<td>
+								<span th:id="|span-ctrl-model-${dev.longCoding}|" th:text="${dev.ctrlModel.toString() eq 'LOCAL'} ? '本地' : '远程'"></span>
+							</td>
+							<td><a class="link dev" href="#"
+								th:data-long-coding="${dev.longCoding}"> <span
+									data-feather="bar-chart"></span>
 							</a></td>
 						</tr>
 					</tbody>
@@ -108,14 +106,11 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr th:each="dev : ${listDevValue}" 
-							th:id="|tr-${dev.longCoding}|"
+						<tr th:each="dev : ${listDevValue}" th:id="|tr-${dev.longCoding}|"
 							th:data-state="${dev.devStateId}">
 							<td th:text="${dev.name}">设备名</td>
-							<td>
-								<span th:id="|span-value-${dev.longCoding}|"></span>
-								<span th:text="${dev.collectProperty.unitSymbol}">单位符号</span>
-							</td>
+							<td><span th:id="|span-value-${dev.longCoding}|"></span> <span
+								th:text="${dev.collectProperty.unitSymbol}">单位符号</span></td>
 							<td><a class="link dev" href="#" title="${dev.longCoding}">
 									<span data-feather="bar-chart"></span>
 							</a></td>

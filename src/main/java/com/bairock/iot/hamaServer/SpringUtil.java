@@ -5,8 +5,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
-import com.bairock.iot.hamaServer.communication.MyOnStateChangedListener;
-
 @Component
 public class SpringUtil implements ApplicationContextAware {
 

@@ -15,7 +15,6 @@ import com.bairock.iot.intelDev.communication.DevChannelBridge;
 import com.bairock.iot.intelDev.device.CtrlModel;
 import com.bairock.iot.intelDev.device.DevStateHelper;
 import com.bairock.iot.intelDev.device.Device;
-import com.bairock.iot.intelDev.device.Gear;
 import com.bairock.iot.intelDev.device.IStateDev;
 import com.bairock.iot.intelDev.order.DeviceOrder;
 import com.bairock.iot.intelDev.order.OrderType;
@@ -50,6 +49,10 @@ public class DevWebSocketController {
 		if (dev == null) {
 			return;
 		}
+		if(order.getOrderType() == OrderType.GEAR) {
+			sendLocalOrder(order);
+			return;
+		}
 		if (dev.getCtrlModel() == CtrlModel.LOCAL) {
 			sendLocalOrder(order);
 		} else if (dev.getCtrlModel() == CtrlModel.REMOTE) {
@@ -61,10 +64,10 @@ public class DevWebSocketController {
 	}
 	
 	private void sendLocalOrder(DeviceOrder order) {
-		if(order.getOrderType() == OrderType.CTRL_DEV) {
+//		if(order.getOrderType() == OrderType.CTRL_DEV) {
 			sendCtrlOrderToPad(order);
-		}
-		sendGearToPad(order);
+//		}
+//		sendGearToPad(order);
 	}
 	
 	private void sendRemoteOrder(Device dev, DeviceOrder order) {
@@ -83,26 +86,6 @@ public class DevWebSocketController {
 			strOrder = subDev.getTurnOffOrder();
 		}
 		db.sendOrder(strOrder);
-	}
-
-	private void sendGearToPad(DeviceOrder order) {
-		// 向pad发送档位信息
-		String data;
-		if(order.getOrderType() == OrderType.GEAR) {
-			data = Gear.ZIDONG.toString();
-		}else {
-			if(order.getData().equals(DevStateHelper.DS_KAI)) {
-				data = Gear.KAI.toString();
-			}else {
-				data = Gear.GUAN.toString();
-			}
-		}
-		DeviceOrder orderBase = new DeviceOrder();
-		orderBase.setOrderType(OrderType.GEAR);
-		orderBase.setLongCoding(order.getLongCoding());
-		orderBase.setData(data);
-		String strOrder = Util.orderBaseToString(orderBase);
-		PadChannelBridgeHelper.getIns().sendOrderSynable(order.getUsername(), order.getDevGroupName(), strOrder);
 	}
 
 	private void sendCtrlOrderToPad(DeviceOrder order) {

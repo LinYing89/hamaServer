@@ -1,20 +1,37 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport"
 	content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link rel="stylesheet"
 	href="/webjars/bootstrap/4.1.3/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/root.css">
 <link rel="stylesheet" type="text/css"
 	href="/css/my-list-group-item.css">
 <title>组列表</title>
 </head>
 <body>
-	<div th:replace="fragments/header :: header('',${user.name})">header</div>
-	<br>
-
-	<div class="container">
+	<nav
+		class="navbar navbar-expand-sm navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+		<a class="navbar-brand col-auto mr-auto" href="#">智能物联网平台</a>
+		<ul class="navbar-nav px-3">
+			<li id="li-devgroup-info" class="nav-item dropdown text-nowrap"
+				th:attr="data-username=${user.name}"><a
+				class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+				role="button" data-toggle="dropdown" aria-haspopup="true"
+				aria-expanded="false" th:text="${user.name}"> admin </a>
+				<div class="dropdown-menu dropdown-menu-right"
+					aria-labelledby="navbarDropdown">
+					<a sec:authorize="hasRole('ROLE_USER')" class="dropdown-item" href="#">个人资料</a>
+					<form action="#" th:action="@{/logout}" method="post">
+						<button type="submit" class="dropdown-item btn btn-link">退出</button>
+					</form>
+				</div></li>
+		</ul>
+	</nav>
+	<div class="container mt-5" role="main">
 
 		<table class="table">
 			<thead>
@@ -26,20 +43,22 @@
 			</thead>
 			<tbody>
 				<tr th:each="group : ${user.listDevGroup}">
-					<td><a href="#" th:href="|/device/page/${group.id}|" th:text="${group.name}">组名</a></td>
+					<td><a href="#" th:href="|/device/page/${group.id}|"
+						th:text="${group.name}">组名</a></td>
 					<td th:text="${group.petName}">昵称</td>
-					<td>
-						<a href="#" data-option="edit"
-							data-toggle="modal" data-target="#editGroupModal"
-							th:attr="data-group-id=${group.id}, data-group-name=${group.name}, data-group-password=${group.psd}, data-group-petname=${group.petName}">编辑</a>
+					<td sec:authorize="hasRole('ROLE_USER')"><a href="#"
+						data-option="edit" data-toggle="modal"
+						data-target="#editGroupModal"
+						th:attr="data-group-id=${group.id}, data-group-name=${group.name}, data-group-password=${group.psd}, data-group-petname=${group.petName}">编辑</a>
 						<a class="del-group" href="#" th:href="|/group/del/${group.id}|">删除</a>
 					</td>
 				</tr>
 			</tbody>
 		</table>
 
-		<button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#editGroupModal"
-			data-option="add" th:attr="data-user-id=${user.id}">添加组</button>
+		<button sec:authorize="hasRole('ROLE_USER')" type="button" class="btn btn-primary btn-block"
+			data-toggle="modal" data-target="#editGroupModal" data-option="add"
+			th:attr="data-user-id=${user.id}">添加组</button>
 	</div>
 
 	<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog"
@@ -64,8 +83,9 @@
 			</div>
 		</div>
 	</div>
-	
-	<div class="modal fade" id="editGroupModal" tabindex="-1" role="dialog" aria-hidden="true">
+
+	<div class="modal fade" id="editGroupModal" tabindex="-1" role="dialog"
+		aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -76,25 +96,24 @@
 					</button>
 				</div>
 				<div class="modal-body">
-					<form th:action="|/group/add/${user.id}|" method="post" onsubmit="return checkGroupForm()">
+					<form th:action="|/group/add/${user.id}|" method="post"
+						onsubmit="return checkGroupForm()">
 						<div class="form-group">
-							<label>组名称</label> <input type="text"
-								class="form-control" id="group-name" name="name"
-								required="required">
+							<label>组名称</label> <input type="text" class="form-control"
+								id="group-name" name="name" required="required">
 						</div>
 						<div class="form-group">
-							<label>组昵称</label> <input type="text"
-								class="form-control" id="group-petname" name="petName"
-								required="required">
+							<label>组昵称</label> <input type="text" class="form-control"
+								id="group-petname" name="petName" required="required">
 						</div>
 
 						<div class="form-group">
-							<label>密码</label> <input type="text"
-								class="form-control" id="group-password" name="psd">
+							<label>密码</label> <input type="text" class="form-control"
+								id="group-password" name="psd">
 						</div>
 						<div class="form-group">
-							<label>确认密码</label> <input type="text"
-								class="form-control" id="group-ensurepassword">
+							<label>确认密码</label> <input type="text" class="form-control"
+								id="group-ensurepassword">
 						</div>
 						<div class="form-group">
 							<span id="manager-code-repeated" class="text-danger"></span>

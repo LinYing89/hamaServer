@@ -20,17 +20,20 @@ public class HomeController {
 	@Autowired
 	private UserService userService;
 	
-	@RequestMapping("/loginSuccess")
+	@RequestMapping(value= {"/", "/loginSuccess"})
 	public String loginSuccess(HttpServletRequest request, Model model) {
 		HttpSession session = request.getSession();
 		SecurityContextImpl securityContext = (SecurityContextImpl) session.getAttribute("SPRING_SECURITY_CONTEXT");
 		String name = ((UserDetails)securityContext.getAuthentication().getPrincipal()).getUsername();
+		if(name.equals("ggsb_public")) {
+			name = "ggsb";
+		}
 		User user = userService.findByName(name);
 		model.addAttribute("user", user);
 		return "group/groupList";
 	}
 	
-	@GetMapping(value= {"/", "/login"})
+	@GetMapping(value= {"/login"})
 	public String login() {
 		return "login";
 	}

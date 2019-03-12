@@ -10,8 +10,6 @@ import com.bairock.iot.intelDev.communication.RefreshCollectorValueHelper;
 import com.bairock.iot.intelDev.device.CtrlModel;
 import com.bairock.iot.intelDev.device.Device;
 import com.bairock.iot.intelDev.device.Device.OnStateChangedListener;
-import com.bairock.iot.intelDev.device.IStateDev;
-import com.bairock.iot.intelDev.device.devcollect.DevCollect;
 import com.bairock.iot.intelDev.device.devcollect.DevCollectClimateContainer;
 import com.bairock.iot.intelDev.order.DeviceOrder;
 import com.bairock.iot.intelDev.order.OrderType;
@@ -31,7 +29,7 @@ public class MyOnStateChangedListener implements OnStateChangedListener {
 	@Override
 	public void onStateChanged(Device dev, String stateId) {
 		Device superParent = dev.findSuperParent();
-		if (dev instanceof IStateDev || dev instanceof DevCollect) {
+//		if (dev instanceof IStateDev || dev instanceof DevCollect) {
 			// 通知网页
 			WebDevState webDevState = new WebDevState(dev.getLongCoding(), Integer.parseInt(dev.getDevState()));
 			deviceService.broadcastStateChanged(superParent.getUsername(), superParent.getDevGroupName(), webDevState);
@@ -48,7 +46,7 @@ public class MyOnStateChangedListener implements OnStateChangedListener {
 				PadChannelBridgeHelper.getIns().sendOrderSynable(superParent.getUsername(),
 						superParent.getDevGroupName(), strOrder);
 			}
-		}
+//		}
 	}
 
 	@Override

@@ -1,0 +1,5 @@
+.div-msg {
+	height: calc(100vh - 48px);
+	overflow-x: hidden;
+	overflow-y: auto;
+}

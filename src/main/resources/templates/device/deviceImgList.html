@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" type="text/css" th:href="@{/css/deviceImgList.css}">
+<link rel="stylesheet"
+	href="/webjars/bootstrap/4.1.3/css/bootstrap.min.css">
+<title>设备</title>
+</head>
+<body>
+	<nav
+		class="navbar navbar-expand-sm navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+		<a class="navbar-brand col-auto mr-auto" href="#">智能物联网平台</a>
+	</nav>
+	<div class="container mt-5" role="main">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>编码</th>
+					<th>名称</th>
+					<th>版本</th>
+					<th>图片</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="devImg : ${list}">
+					<td th:text="${devImg.code}"></td>
+					<td th:text="${devImg.name}"></td>
+					<td th:text="${devImg.versionCode}"></td>
+					<td>
+						<img alt="" th:src="|../${devImg.path}|">
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<script src="/webjars/jquery/3.3.1/jquery.min.js"></script>
+	<script src="/webjars/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+	<script src="/webjars/popper.js/1.14.3/umd/popper.min.js"></script>
+</body>
+</html>

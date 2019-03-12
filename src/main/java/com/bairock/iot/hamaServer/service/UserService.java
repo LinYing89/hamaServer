@@ -5,8 +5,10 @@ import org.springframework.stereotype.Service;
 
 import com.bairock.iot.hamaServer.Util;
 import com.bairock.iot.hamaServer.data.Result;
+import com.bairock.iot.hamaServer.data.UserAuthority;
 import com.bairock.iot.hamaServer.enums.ResultEnum;
 import com.bairock.iot.hamaServer.exception.UserException;
+import com.bairock.iot.hamaServer.repository.UserAuthorityRepo;
 import com.bairock.iot.hamaServer.repository.UserRepository;
 import com.bairock.iot.hamaServer.utils.ResultUtil;
 import com.bairock.iot.intelDev.user.DevGroup;
@@ -20,6 +22,8 @@ public class UserService {
 	
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private UserAuthorityRepo userAuthorityRepo;
 	
 	public User findById(long userId) {
 		User user = userRepository.findById(userId).orElse(null);
@@ -37,9 +41,15 @@ public class UserService {
 	
 //	@CachePut(value = "user", key="#result.name")
 	public User addUser(User user) {
+		UserAuthority ua = new UserAuthority();
+		ua.setUsername(user.getName());
+		ua.setAuthority("ROLE_USER");
+		userAuthorityRepo.saveAndFlush(ua);
+		
 		String psd = user.getPsd();
 		String encodePsd = Util.encodePassword(psd);
 		user.setPsd(encodePsd);
+		
 		return userRepository.saveAndFlush(user);
 	}
 	

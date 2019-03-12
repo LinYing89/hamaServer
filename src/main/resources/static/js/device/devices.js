@@ -44,25 +44,37 @@ $(document).ready(function() {
 });
 
 function ctrlClick(devId, longCoding, action) {
-	var orderType;
-	var data;
+	var orderTypeCtrl;
+	var dataCtrl;
+	var dataGear;
 	if(action == 2){
-		orderType = 'GEAR';
+		dataGear = 'ZIDONG';
 	}else{
-		orderType = "CTRL_DEV";
+		orderTypeCtrl = "CTRL_DEV";
 		if(action == 0){
-			data = 'ds_g';
+			dataCtrl = 'ds_g';
+			dataGear = 'GUAN';
 		}else{
-			data = "ds_k";
+			dataCtrl = "ds_k";
+			dataGear = 'KAI';
 		}
+		stompClient.send("/app/ctrlDev", {}, JSON.stringify({
+			'devId' : devId,
+			'longCoding' : longCoding,
+			'orderType' : orderTypeCtrl,
+			'username' : userName,
+			'devGroupName' : devGroupName,
+			'data' : dataCtrl
+		}));
 	}
+	
 	stompClient.send("/app/ctrlDev", {}, JSON.stringify({
 		'devId' : devId,
 		'longCoding' : longCoding,
-		'orderType' : orderType,
+		'orderType' : "GEAR",
 		'username' : userName,
 		'devGroupName' : devGroupName,
-		'data' : data
+		'data' : dataGear
 	}));
 }
 
@@ -84,6 +96,8 @@ function initWebSocket() {
 		stompClient.subscribe(topicDevGear, handlerDevGear);
 		var topicDevValue = '/topic/' + userInfo + '/devValue'
 		stompClient.subscribe(topicDevValue, handlerDevValue);
+		var topicDevCtrlModel = '/topic/' + userInfo + '/devCtrlModel'
+		stompClient.subscribe(topicDevCtrlModel, handlerDevCtrlModel);
 	});
 }
 
@@ -138,4 +152,15 @@ function handlerDevValue(message) {
 	var devValue = JSON.parse(message.body);
 	var tdValue = $('#span-value-' + devValue.longCoding);
 	tdValue.text(devValue.value);
+}
+
+function handlerDevCtrlModel(message) {
+	var devValue = JSON.parse(message.body);
+	var td = $('#span-ctrl-model-' + devValue.longCoding);
+	if(devValue.ctrlModel == 1){
+		td.text("本地");
+	}else{
+		td.text("远程");
+	}
+	
 }
