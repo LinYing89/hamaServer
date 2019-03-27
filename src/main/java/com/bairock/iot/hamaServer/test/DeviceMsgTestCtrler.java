@@ -12,4 +12,9 @@ public class DeviceMsgTestCtrler {
 	private String getDeviceMsgPage() {
 		return "test/deviceMsg";
 	}
+	
+	@GetMapping("/padMsg")
+	private String getDPadMsgPage() {
+		return "test/padMsg";
+	}
 }

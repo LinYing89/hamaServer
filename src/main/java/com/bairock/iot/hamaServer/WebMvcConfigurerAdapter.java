@@ -10,6 +10,7 @@ public class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		registry.addResourceHandler("/devImg/**").addResourceLocations("file:C:/dafa/inteldev-img/");
+		registry.addResourceHandler("/download/**").addResourceLocations("file:C:/dafa/download/");
 		WebMvcConfigurer.super.addResourceHandlers(registry);
 	}
 }

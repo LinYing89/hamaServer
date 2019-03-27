@@ -16,8 +16,8 @@
 	<div class="container">
 		<nav
 			class="navbar navbar-expand-sm navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-			<a class="navbar-brand col-auto mr-auto" href="#">智能物联网平台</a> 
-<!-- 			<a class="nav-item nav-link text-muted" href="#">公共设备</a> -->
+			<a class="navbar-brand col-auto mr-auto" href="#">智能物联网平台</a>
+			<!-- 			<a class="nav-item nav-link text-muted" href="#">公共设备</a> -->
 			<form action="#" th:action="@{/login}" method="post">
 				<input type="text" name="username" value="ggsb_public" hidden="true">
 				<input type="password" name="password" value="a123456" hidden="true">
@@ -57,6 +57,17 @@
 							role="button">注&ensp;册</a>
 					</div>
 				</form>
+				<div class="row align-items-center justify-content-around">
+					<form action="#" th:action="@{/login}" method="post">
+						<input type="text" name="username" value="ggsb_public"
+							hidden="true"> <input type="password" name="password"
+							value="a123456" hidden="true"> <input type="checkbox"
+							name="remember-me" hidden="true">
+						<button type="submit" class="btn btn-link">公共设备</button>
+					</form>
+					<a class="text-center" href="../download/hamaAndroid.apk">下载</a>
+				</div>
+
 			</div>
 		</div>
 	</div>

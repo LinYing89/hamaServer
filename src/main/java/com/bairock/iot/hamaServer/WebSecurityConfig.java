@@ -30,7 +30,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.authorizeRequests()
-			.antMatchers("/user/page/register", "/user/register", "/group/client/**", "/deviceImg/**", "/deviceMsg/**", "/hamaServer-websocket/**", "/css/**", "/img/**", "/js/**", "/webjars/**", "/devImg/**").permitAll()
+			.antMatchers("/user/page/register", "/user/register", "/group/client/**", "/deviceImg/**", "/download/**", "/deviceMsg/**", "/hamaServer-websocket/**", "/css/**", "/img/**", "/js/**", "/webjars/**", "/devImg/**").permitAll()
 			.antMatchers(HttpMethod.POST, "/group/client/**").permitAll()
 			.anyRequest().authenticated().and()
 				.formLogin().loginPage("/login").defaultSuccessUrl("/loginSuccess", true).permitAll().and().logout()

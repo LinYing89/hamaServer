@@ -24,4 +24,15 @@ public class DeviceMsgTestService {
 		String topic = String.format("/topic/deviceMsg");
 		messaging.convertAndSend(topic, deviceMsg);
 	}
+	
+	public void broadcastPadMsg(DeviceMsg deviceMsg) {
+		// 查看过滤条件
+		if (DeviceMsgTestWSCtrler.padMsgFilter != null && !DeviceMsgTestWSCtrler.padMsgFilter.isEmpty()) {
+			if (!deviceMsg.getMsg().contains(DeviceMsgTestWSCtrler.padMsgFilter)) {
+				return;
+			}
+		}
+		String topic = String.format("/topic/padMsg");
+		messaging.convertAndSend(topic, deviceMsg);
+	}
 }

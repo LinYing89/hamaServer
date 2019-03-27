@@ -21,6 +21,7 @@ $(document).ready(function() {
 			$(this).attr("class", "table-success")
 			break;
 		case "ds_yc" :
+		case "ds_wz" :
 			$(this).attr("class", "table-danger")
 			break;
 		}
@@ -116,6 +117,7 @@ function handlerDevState(message) {
 		//tr.addClass("table-success");
 		break;
 	case 4:
+	case 7:
 		tr.attr("class", "table-danger")
 //		tr.removeClass("table-success");
 //		tr.addClass("table-danger");

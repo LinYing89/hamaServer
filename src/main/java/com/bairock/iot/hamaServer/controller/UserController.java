@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.bairock.iot.hamaServer.data.RegisterUserHelper;
 import com.bairock.iot.hamaServer.data.Result;
@@ -32,8 +31,14 @@ public class UserController {
 
     //提交注册信息
     @PostMapping("/register")
-    public String registerSubmit(RedirectAttributes model, @ModelAttribute User user) {
+    public String registerSubmit(Model model, @ModelAttribute User user) {
 
+    	User userDb = userService.findByName(user.getName());
+    	if(null != userDb) {
+    		model.addAttribute("username", user.getName());
+    		model.addAttribute("error", "用户名已存在");
+    		return "register";
+    	}
     	userService.addUser(user);
         //重定向
         return "redirect:/loginSucces";

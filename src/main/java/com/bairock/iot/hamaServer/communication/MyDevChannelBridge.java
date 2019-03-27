@@ -254,7 +254,7 @@ public class MyDevChannelBridge extends DevChannelBridge {
 	private void setDeviceListener(Device device) {
 //		device.setCtrlModel(CtrlModel.UNKNOW);
 		if(device.getStOnStateChangedListener().isEmpty()) {
-			device.setDevStateId(DevStateHelper.DS_YI_CHANG);
+			device.setDevStateId(DevStateHelper.DS_UNKNOW);
 			device.addOnStateChangedListener(myOnStateChangedListener);
 		}
 		if(device.getStOnCtrlModelChanged().isEmpty()) {
