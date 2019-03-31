@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.bairock.iot.hamaServer.communication.PadChannelBridge;
+import com.bairock.iot.hamaServer.communication.PadChannelBridgeHelper;
 import com.bairock.iot.hamaServer.data.DevGroupLoginResult;
 import com.bairock.iot.hamaServer.data.Result;
 import com.bairock.iot.hamaServer.service.DevGroupService;
@@ -63,8 +65,33 @@ public class GroupController {
     //客户端组登录
     @ResponseBody
     @GetMapping("/client/devGroupLogin/{userName}/{groupName}/{groupPsd}")
-    public Result<DevGroupLoginResult> devGroupLogin(@PathVariable String userName, @PathVariable String groupName, @PathVariable String groupPsd, Model model) throws Exception{
+    public Result<DevGroupLoginResult> devGroupLogin(@PathVariable String userName, @PathVariable String groupName, @PathVariable String groupPsd) throws Exception{
     	return devGroupService.devGroupLogin(userName, groupName, groupPsd);
+    }
+    
+    /**
+     * 客户端组登录
+     * @param loginModel, 登录模式,local本地, remote远程
+     * @param userName 用户名
+     * @param groupName 组名
+     * @param groupPsd 组密码
+     * @return
+     * @throws Exception
+     */
+    @ResponseBody
+    @GetMapping("/client/devGroupLogin/{loginModel}/{userName}/{groupName}/{groupPsd}")
+    public Result<DevGroupLoginResult> devGroupLogin2(@PathVariable String loginModel, @PathVariable String userName, @PathVariable String groupName, @PathVariable String groupPsd) throws Exception{
+    	Result<DevGroupLoginResult> rs = devGroupService.devGroupLogin(userName, groupName, groupPsd);
+    	//如果登录成功
+    	if(rs.getCode() == 0) {
+	    	if(loginModel.toLowerCase().equals("local")) {
+	    		//本地登录, 查看本地是否已有登录, 如果已有, 将已有的踢掉
+	    		for (PadChannelBridge pcb : PadChannelBridgeHelper.getIns().getListPadChannelBridge(userName, groupName)) {
+	    			pcb.sendLogout();
+	    		}
+	    	}
+    	}
+    	return rs;
     }
     
     //客户端组下载

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.bairock.iot.intelDev.order.LoginModel;
 import com.bairock.iot.intelDev.user.IntelDevHelper;
 
 public class PadChannelBridgeHelper {
@@ -41,6 +42,15 @@ public class PadChannelBridgeHelper {
 		List<PadChannelBridge> list = getListPadChannelBridge(userName, groupName);
 		for (PadChannelBridge pcb : list) {
 			pcb.sendMessageNotReponse(order);
+		}
+	}
+	
+	public void sendOrderToLocal(String userName, String groupName, String order) {
+		List<PadChannelBridge> list = getListPadChannelBridge(userName, groupName);
+		for (PadChannelBridge pcb : list) {
+			if(pcb.loginModel.equals(LoginModel.LOCAL)) {
+				pcb.sendMessageNotReponse(order);
+			}
 		}
 	}
 	

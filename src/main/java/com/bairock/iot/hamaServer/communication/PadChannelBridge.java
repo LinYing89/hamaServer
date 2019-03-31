@@ -21,6 +21,7 @@ import com.bairock.iot.intelDev.device.OrderHelper;
 import com.bairock.iot.intelDev.device.devcollect.DevCollect;
 import com.bairock.iot.intelDev.device.devswitch.SubDev;
 import com.bairock.iot.intelDev.order.DeviceOrder;
+import com.bairock.iot.intelDev.order.LoginModel;
 import com.bairock.iot.intelDev.order.OrderBase;
 import com.bairock.iot.intelDev.order.OrderType;
 import com.bairock.iot.intelDev.user.DevGroup;
@@ -56,10 +57,8 @@ public class PadChannelBridge {
 //	private DevGroup devGroup;
 	// 持有设备
 	private List<Device> listDevice = new ArrayList<>();
-	//是否是本地的pad连接, 如果是, 则断开时将本地设备设为异常, 如果不是, 则断开时不做处理
-	//只有收到本地发过来的状态和值时, 才判定为本地pad
-	private boolean ensureLocal;
 	private String channelId;
+	public String loginModel;
 	// the channel have no response count,0 if have response
 	private int noReponse;
 
@@ -73,7 +72,7 @@ public class PadChannelBridge {
 		myOnStateChangedListener = SpringUtil.getBean(MyOnStateChangedListener.class);
 		myOnGearChangedListener = SpringUtil.getBean(MyOnGearChangedListener.class);
 		myOnCtrlModelChangedListener = SpringUtil.getBean(MyOnCtrlModelChangedListener.class);
-		
+
 		onPadMsgListener = new MyOnPadMsgListener();
 	}
 
@@ -115,7 +114,7 @@ public class PadChannelBridge {
 
 	public void channelReceived(String msg) {
 		onPadMsgListener.onReceived(userName, groupName, msg);
-		
+
 		logger.info("channelReceived userName:" + userName + " groupName:" + groupName + " msg:" + msg);
 		noReponse = 0;
 
@@ -131,8 +130,21 @@ public class PadChannelBridge {
 				if (null != onPadConnectedListener) {
 					onPadConnectedListener.onPadConnected(userName, groupName);
 				}
-				// 发送初始化状态
-				sendInitStateToPad();
+				loginModel = orderBase.getData();
+				if (null != loginModel) {
+					if (loginModel.equals(LoginModel.LOCAL)) {
+						// 本地登录, 踢掉其他本地登录的连接
+						for (PadChannelBridge pb : PadChannelBridgeHelper.getIns().getListPadChannelBridge(userName,
+								groupName)) {
+							if (pb != this && pb.loginModel.equals(LoginModel.LOCAL)) {
+								pb.sendLogout();
+							}
+						}
+					} else {
+						// 发送初始化状态
+						sendInitStateToPad();
+					}
+				}
 				break;
 			case GEAR:
 				if (userName != null && groupName != null) {
@@ -155,12 +167,14 @@ public class PadChannelBridge {
 						return;
 					}
 					db.sendOrder(orderBase.getData(), dev);
-				}else {
+				} else {
 					sendToOtherClient(msg);
 				}
 				break;
 			case STATE:
-				ensureLocal = true;
+				if (null == loginModel || !loginModel.equals(LoginModel.LOCAL)) {
+					return;
+				}
 				sendToOtherClient(msg);
 				devOrder = (DeviceOrder) orderBase;
 				dev = findDevByCoding(devOrder.getLongCoding());
@@ -171,13 +185,16 @@ public class PadChannelBridge {
 				dev.setDevStateId(orderBase.getData());
 				break;
 			case VALUE:
-				ensureLocal = true;
+				if (null == loginModel || !loginModel.equals(LoginModel.LOCAL)) {
+					return;
+				}
 				sendToOtherClient(msg);
 				devOrder = (DeviceOrder) orderBase;
 				dev = findDevByCoding(devOrder.getLongCoding());
 				if (null == dev || !(dev instanceof DevCollect)) {
 					return;
 				}
+				dev.setDevStateId(DevStateHelper.DS_ZHENG_CHANG);
 				dev.setCtrlModel(CtrlModel.LOCAL);
 				((DevCollect) dev).getCollectProperty().setCurrentValue(Float.parseFloat(orderBase.getData()));
 				break;
@@ -423,6 +440,12 @@ public class PadChannelBridge {
 		return channel;
 	}
 
+	public void sendLogout() {
+		OrderBase ob = new OrderBase();
+		ob.setOrderType(OrderType.LOGOUT);
+		send(Util.orderBaseToString(ob));
+	}
+
 	public void sendToAllClient(String msg) {
 		for (PadChannelBridge pcb : PadChannelBridgeHelper.getIns().getListPadChannelBridge(userName, groupName)) {
 			pcb.sendMessageNotReponse(msg);
@@ -442,7 +465,7 @@ public class PadChannelBridge {
 		if (null == getChannel()) {
 			return;
 		}
-		if (noReponse > 4) {
+		if (noReponse > 6) {
 			channel.close();
 			PadChannelBridgeHelper.getIns().removeBridge(this);
 		} else {
@@ -465,15 +488,14 @@ public class PadChannelBridge {
 		getChannel().writeAndFlush(Unpooled.copiedBuffer(msg.getBytes()));
 		onPadMsgListener.onSend(userName, groupName, msg);
 	}
-	
+
 	public void close() {
-		//非本地pad不做处理
-		if(!ensureLocal) {
-			return;
-		}
-		for(Device dev : listDevice) {
-			if(dev.findSuperParent().getCtrlModel() == CtrlModel.LOCAL) {
-				dev.setDevStateId(DevStateHelper.DS_YI_CHANG);
+		// 非本地pad不做处理
+		if (null != loginModel && loginModel.equals(LoginModel.LOCAL)) {
+			for (Device dev : listDevice) {
+				if (dev.findSuperParent().getCtrlModel() == CtrlModel.LOCAL) {
+					dev.setDevStateId(DevStateHelper.DS_YI_CHANG);
+				}
 			}
 		}
 	}
@@ -481,10 +503,10 @@ public class PadChannelBridge {
 	public interface OnPadConnectedListener {
 		void onPadConnected(String userName, String groupName);
 	}
-	
+
 	public interface OnPadMsgListener {
 		void onSend(String userName, String groupName, String msg);
-		
+
 		void onReceived(String userName, String groupName, String msg);
 	}
 }

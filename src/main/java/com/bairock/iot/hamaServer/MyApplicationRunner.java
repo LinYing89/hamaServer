@@ -28,9 +28,8 @@ public class MyApplicationRunner implements ApplicationRunner {
         DevChannelBridgeHelper.DEV_CHANNELBRIDGE_NAME = MyDevChannelBridge.class.getName();
         DevServer.PORT = config.getDevicePort();
         logger.info("DevServer PORT: " + DevServer.PORT);
-        DevServer devServer = new DevServer();
         try {
-			devServer.run();
+        	DevServer.getIns().run();
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("DevServer start error " + e.getMessage());

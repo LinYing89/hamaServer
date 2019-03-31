@@ -90,7 +90,7 @@ public class DevWebSocketController {
 
 	private void sendCtrlOrderToPad(DeviceOrder order) {
 		String strOrder = Util.orderBaseToString(order);
-		PadChannelBridgeHelper.getIns().sendOrderSynable(order.getUsername(), order.getDevGroupName(), strOrder);
+		PadChannelBridgeHelper.getIns().sendOrderToLocal(order.getUsername(), order.getDevGroupName(), strOrder);
 	}
 
 }
