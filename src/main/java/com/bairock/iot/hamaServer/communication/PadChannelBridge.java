@@ -58,7 +58,7 @@ public class PadChannelBridge {
 	// 持有设备
 	private List<Device> listDevice = new ArrayList<>();
 	private String channelId;
-	public String loginModel;
+	public String loginModel = null;
 	// the channel have no response count,0 if have response
 	private int noReponse;
 
@@ -121,6 +121,10 @@ public class PadChannelBridge {
 		try {
 			ObjectMapper om = new ObjectMapper();
 			DeviceOrder orderBase = om.readValue(msg, DeviceOrder.class);
+			if(orderBase.getOrderType() != OrderType.HEAD_USER_INFO && null == loginModel) {
+				return;
+			}
+			
 //			OrderBase ob = new OrderBase();
 			DeviceOrder devOrder = null;
 			switch (orderBase.getOrderType()) {
@@ -133,15 +137,13 @@ public class PadChannelBridge {
 				loginModel = orderBase.getData();
 				if (null != loginModel) {
 					if (loginModel.equals(LoginModel.LOCAL)) {
-						// 本地登录, 踢掉其他本地登录的连接
-						for (PadChannelBridge pb : PadChannelBridgeHelper.getIns().getListPadChannelBridge(userName,
-								groupName)) {
-							if (pb != this && pb.loginModel.equals(LoginModel.LOCAL)) {
-								pb.sendLogout();
-							}
+						// 本地登录, 如果已有本地登录, 踢掉本次连接
+						boolean haved = PadChannelBridgeHelper.getIns().LocalLoginHaved(this, userName, groupName);
+						if(haved) {
+							sendLogout();
 						}
 					} else {
-						// 发送初始化状态
+						// 远程登录, 推送服务器设备状态到客户端
 						sendInitStateToPad();
 					}
 				}
@@ -181,7 +183,13 @@ public class PadChannelBridge {
 				if (null == dev) {
 					return;
 				}
-				dev.setCtrlModel(CtrlModel.LOCAL);
+				Device devParent = dev.findSuperParent();
+
+                if(!devParent.isNormal()){
+                    devParent.setDevStateId(DevStateHelper.DS_ZHENG_CHANG);
+                }
+                
+                devParent.setCtrlModel(CtrlModel.LOCAL);
 				dev.setDevStateId(orderBase.getData());
 				break;
 			case VALUE:

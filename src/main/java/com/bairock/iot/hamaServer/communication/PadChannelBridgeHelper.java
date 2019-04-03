@@ -33,6 +33,39 @@ public class PadChannelBridgeHelper {
 		}
 		return list;
 	}
+	
+	/**
+	 * 是否已有本地登录
+	 * @param userName
+	 * @param groupName
+	 * @return, 如果已有本地登录, 返回true, 否则false
+	 */
+	public boolean LocalLoginHaved(String userName, String groupName) {
+		List<PadChannelBridge> list = getListPadChannelBridge(userName, groupName);
+		for(PadChannelBridge pb : list) {
+			if(null != pb.loginModel && pb.loginModel.equals(LoginModel.LOCAL)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * 是否已有本地登录
+	 * @param nowPb 准备登录的连接, 查找非本次连接的其他本地登录
+	 * @param userName
+	 * @param groupName
+	 * @return, 如果已有本地登录, 返回true, 否则false
+	 */
+	public boolean LocalLoginHaved(PadChannelBridge nowPb, String userName, String groupName) {
+		List<PadChannelBridge> list = getListPadChannelBridge(userName, groupName);
+		for(PadChannelBridge pb : list) {
+			if(null != pb.loginModel && pb.loginModel.equals(LoginModel.LOCAL) && pb != nowPb) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public void setOnPadDisconnectedListener(OnPadDisconnectedListener onPadDisconnectedListener) {
 		this.onPadDisconnectedListener = onPadDisconnectedListener;

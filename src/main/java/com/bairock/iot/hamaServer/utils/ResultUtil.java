@@ -1,6 +1,6 @@
 package com.bairock.iot.hamaServer.utils;
 
-import com.bairock.iot.hamaServer.data.Result;
+import com.bairock.iot.intelDev.data.Result;
 
 public class ResultUtil {
 

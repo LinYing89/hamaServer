@@ -32,8 +32,16 @@ public class DeviceController {
 		List<Device> listDevState = group.findListIStateDev(true);
 		List<DevCollect> listDevValue = group.findListCollectDev(true);
 		model.addAttribute("username", group.getUser().getName());
+		
+		//组昵称不为空显示组昵称, 否则显示组名
+		String groupPetName = "";
+		if(group.getPetName().isEmpty()) {
+			groupPetName = group.getName();
+		}else {
+			groupPetName = group.getPetName();
+		}
 		model.addAttribute("devGroupName", group.getName());
-		model.addAttribute("devGroupPetName", group.getPetName());
+		model.addAttribute("devGroupPetName", groupPetName);
 		List<Device> listDevStateCache = new ArrayList<>();
 		List<DevCollect> listDevValueCache = new ArrayList<>();
 		for(Device dev : listDevState) {

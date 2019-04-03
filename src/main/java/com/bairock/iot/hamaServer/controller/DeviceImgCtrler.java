@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.bairock.iot.hamaServer.data.Result;
-import com.bairock.iot.hamaServer.enums.ResultEnum;
 import com.bairock.iot.hamaServer.repository.DeviceImgRepo;
 import com.bairock.iot.intelDev.data.DeviceImg;
+import com.bairock.iot.intelDev.data.Result;
+import com.bairock.iot.intelDev.enums.ResultEnum;
 
 @Controller
 @RequestMapping("/deviceImg")

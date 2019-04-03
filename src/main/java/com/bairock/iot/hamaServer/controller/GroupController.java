@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.bairock.iot.hamaServer.communication.PadChannelBridge;
 import com.bairock.iot.hamaServer.communication.PadChannelBridgeHelper;
-import com.bairock.iot.hamaServer.data.DevGroupLoginResult;
-import com.bairock.iot.hamaServer.data.Result;
 import com.bairock.iot.hamaServer.service.DevGroupService;
+import com.bairock.iot.intelDev.data.DevGroupLoginResult;
+import com.bairock.iot.intelDev.data.Result;
 import com.bairock.iot.intelDev.device.Device;
 import com.bairock.iot.intelDev.device.devcollect.DevCollect;
+import com.bairock.iot.intelDev.enums.ResultEnum;
 import com.bairock.iot.intelDev.user.DevGroup;
 import com.bairock.iot.intelDev.user.User;
 
@@ -85,9 +85,11 @@ public class GroupController {
     	//如果登录成功
     	if(rs.getCode() == 0) {
 	    	if(loginModel.toLowerCase().equals("local")) {
-	    		//本地登录, 查看本地是否已有登录, 如果已有, 将已有的踢掉
-	    		for (PadChannelBridge pcb : PadChannelBridgeHelper.getIns().getListPadChannelBridge(userName, groupName)) {
-	    			pcb.sendLogout();
+	    		//本地登录, 查看本地是否已有登录, 如果已有, 不允许本地登录
+	    		boolean haved = PadChannelBridgeHelper.getIns().LocalLoginHaved(userName, groupName);
+	    		if(haved) {
+	    			rs.setCode(ResultEnum.LOCAL_LOGIN_HAVED.getCode());
+	    			rs.setMsg(ResultEnum.LOCAL_LOGIN_HAVED.getMessage());
 	    		}
 	    	}
     	}

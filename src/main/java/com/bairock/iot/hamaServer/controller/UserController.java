@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.bairock.iot.hamaServer.data.RegisterUserHelper;
-import com.bairock.iot.hamaServer.data.Result;
 import com.bairock.iot.hamaServer.service.UserService;
+import com.bairock.iot.intelDev.data.Result;
 import com.bairock.iot.intelDev.user.User;
 
 @Controller

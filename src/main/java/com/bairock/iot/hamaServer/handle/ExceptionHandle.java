@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.bairock.iot.hamaServer.data.Result;
 import com.bairock.iot.hamaServer.exception.UserException;
 import com.bairock.iot.hamaServer.utils.ResultUtil;
+import com.bairock.iot.intelDev.data.Result;
 
 @ControllerAdvice
 public class ExceptionHandle {

@@ -1,6 +1,6 @@
 package com.bairock.iot.hamaServer.exception;
 
-import com.bairock.iot.hamaServer.enums.ResultEnum;
+import com.bairock.iot.intelDev.enums.ResultEnum;
 
 /**
  * 用户信息异常
