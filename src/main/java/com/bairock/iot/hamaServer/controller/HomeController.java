@@ -1,5 +1,7 @@
 package com.bairock.iot.hamaServer.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -11,7 +13,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.bairock.iot.hamaServer.service.DevGroupService;
 import com.bairock.iot.hamaServer.service.UserService;
+import com.bairock.iot.intelDev.user.DevGroup;
 import com.bairock.iot.intelDev.user.User;
 
 @Controller
@@ -19,6 +23,8 @@ public class HomeController {
 
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private DevGroupService devGroupService;
 	
 	@RequestMapping(value= {"/", "/loginSuccess"})
 	public String loginSuccess(HttpServletRequest request, Model model) {
@@ -28,7 +34,10 @@ public class HomeController {
 		if(name.equals("ggsb_public")) {
 			name = "ggsb";
 		}
-		User user = userService.findByName(name);
+		User user = userService.findByUserid(name);
+		session.setAttribute("user", user);
+		List<DevGroup> list = devGroupService.findByUserid(name);
+		user.setListDevGroup(list);
 		model.addAttribute("user", user);
 		return "group/groupList";
 	}

@@ -6,4 +6,5 @@ import com.bairock.iot.hamaServer.data.UserAuthority;
 
 public interface UserAuthorityRepo extends JpaRepository<UserAuthority, Long> {
 
+	UserAuthority findByUserid(String userid);
 }

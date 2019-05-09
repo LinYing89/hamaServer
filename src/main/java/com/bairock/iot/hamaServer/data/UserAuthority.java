@@ -17,7 +17,7 @@ public class UserAuthority {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	private String username;
+	private String userid;
 	private String authority;
 	
 	public long getId() {
@@ -26,11 +26,11 @@ public class UserAuthority {
 	public void setId(long id) {
 		this.id = id;
 	}
-	public String getUsername() {
-		return username;
+	public String getUserid() {
+		return userid;
 	}
-	public void setUsername(String username) {
-		this.username = username;
+	public void setUserid(String userid) {
+		this.userid = userid;
 	}
 	public String getAuthority() {
 		return authority;

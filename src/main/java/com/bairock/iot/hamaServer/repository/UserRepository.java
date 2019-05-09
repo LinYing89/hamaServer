@@ -11,5 +11,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	 * @param name 用户名
 	 * @return 用户对象
 	 */
-	User findByName(String name);
+	User findByUserid(String userid);
 }

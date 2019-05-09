@@ -4,8 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bairock.iot.hamaServer.SpringUtil;
-import com.bairock.iot.hamaServer.repository.UserRepository;
+import com.bairock.iot.hamaServer.service.DevGroupService;
 import com.bairock.iot.hamaServer.service.DeviceService;
+import com.bairock.iot.hamaServer.service.UserService;
 import com.bairock.iot.hamaServer.test.DeviceMsg;
 import com.bairock.iot.hamaServer.test.DeviceMsgTestService;
 import com.bairock.iot.intelDev.communication.DevChannelBridge;
@@ -23,7 +24,8 @@ import com.bairock.iot.intelDev.user.User;
 
 public class MyDevChannelBridge extends DevChannelBridge {
 
-	private UserRepository userRepository;
+	private UserService userService;
+	private DevGroupService devGroupService;
 	private DeviceService deviceService;
 
 	private String userName = "";
@@ -42,7 +44,8 @@ public class MyDevChannelBridge extends DevChannelBridge {
 	private DeviceMsgTestService deviceMsgTestService;
 
 	public MyDevChannelBridge() {
-		userRepository = SpringUtil.getBean(UserRepository.class);
+		userService = SpringUtil.getBean(UserService.class);
+		devGroupService = SpringUtil.getBean(DevGroupService.class);
 		deviceService = SpringUtil.getBean(DeviceService.class);
 		
 		myOnCurrentValueChangedListener = SpringUtil.getBean(MyOnCurrentValueChangedListener.class);
@@ -148,23 +151,24 @@ public class MyDevChannelBridge extends DevChannelBridge {
 		if (null == getDevice()) {
 			// 尝试获取用户名、组名
 			String[] msgs = codingState[1].split(":");
-			String userName = null;
+			String userid = null;
 			String groupName = null;
 			for (String str : msgs) {
 				if (str.startsWith("u")) {
-					userName = str.substring(1);
+					userid = str.substring(1);
 				} else if (str.startsWith("g")) {
 					groupName = str.substring(1);
 				}
 			}
 
-			if (null != coding && null != userName && null != groupName) {
-				User user = userRepository.findByName(userName);
+			if (null != coding && null != userid && null != groupName) {
+				User user = userService.findByUserid(userid);
 				if(null == user) {
-					logger.error("no username : " + userName);
+					logger.error("no username : " + userid);
 					return;
 				}
-				DevGroup group = user.findDevGroupByName(groupName);
+//				DevGroup group = user.findDevGroupByName(groupName);
+				DevGroup group = devGroupService.findByNameAndUserid(groupName, userid);
 				if(null == group) {
 					logger.error("no groupname : " + groupName);
 					return;
@@ -177,7 +181,7 @@ public class MyDevChannelBridge extends DevChannelBridge {
 					Device parent = dev.findSuperParent();
 					parent = deviceService.findById(parent.getId());
 					setDevice(parent);
-					dev.setUsername(userName);
+					dev.setUsername(userid);
 					dev.setDevGroupName(groupName);
 					//重新获取缓存中的数据, 使系统中设备对象唯一
 					dev = ((DevHaveChild)parent).findDevByCoding(coding);
@@ -185,10 +189,10 @@ public class MyDevChannelBridge extends DevChannelBridge {
 					//重新获取缓存中的数据, 使系统中设备对象唯一
 					dev = deviceService.findById(dev.getId());
 					setDevice(dev);
-					dev.setUsername(userName);
+					dev.setUsername(userid);
 					dev.setDevGroupName(groupName);
 				}
-				this.userName = userName;
+				this.userName = userid;
 				this.groupName = groupName;
 				getDevice().setCtrlModel(CtrlModel.REMOTE);
 				setDeviceListener(getDevice());
@@ -298,7 +302,7 @@ public class MyDevChannelBridge extends DevChannelBridge {
 //		}
 		Device rootDev = device.findSuperParent();
 		String groupName = rootDev.getDevGroup().getName();
-		String userName = rootDev.getDevGroup().getUser().getName();
+		String userName = rootDev.getDevGroup().getUser().getUserid();
 		DevChannelBridge d = DevChannelBridgeHelper.getIns().getDevChannelBridge(rootDev.getCoding(), userName,
 				groupName);
 		if (null != d) {

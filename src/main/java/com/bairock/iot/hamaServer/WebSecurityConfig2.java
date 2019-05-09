@@ -1,7 +1,5 @@
 package com.bairock.iot.hamaServer;
 
-import javax.sql.DataSource;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,12 +11,14 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-//@Configuration
-//@EnableWebSecurity
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+import com.bairock.iot.hamaServer.service.MyCustomUserService;
+
+@Configuration
+@EnableWebSecurity
+public class WebSecurityConfig2 extends WebSecurityConfigurerAdapter{
 
 	@Autowired
-	private DataSource dataSource;
+	private MyCustomUserService myCustomUserService;
 
 //	@Override
 //	protected void configure(HttpSecurity http) throws Exception {
@@ -30,7 +30,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.authorizeRequests()
-			.antMatchers("/user/page/register", "/user/register", "/group/client/**", "/deviceImg/**", "/download/**", "/deviceMsg/**", "/hamaServer-websocket/**", "/css/**", "/img/**", "/js/**", "/webjars/**", "/devImg/**").permitAll()
+			.antMatchers("/user/register/**", "/group/client/**", "/deviceImg/**", "/download/**", "/deviceMsg/**", "/hamaServer-websocket/**", "/css/**", "/img/**", "/js/**", "/webjars/**", "/devImg/**").permitAll()
 			.antMatchers(HttpMethod.POST, "/group/client/**").permitAll()
 			.anyRequest().authenticated().and()
 				.formLogin().loginPage("/login").defaultSuccessUrl("/loginSuccess", true).permitAll().and().logout()
@@ -46,13 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//		auth.jdbcAuthentication().dataSource(dataSource)
-//				.usersByUsernameQuery("select name, psd from User where name=?")
-//				.passwordEncoder(passwordEncoder());
-		auth.jdbcAuthentication().dataSource(dataSource)
-				.usersByUsernameQuery("select name, psd, true from User where name=?")
-				.authoritiesByUsernameQuery("select username, authority from user_authority where username=?")
-				.passwordEncoder(passwordEncoder());
+		auth.userDetailsService(myCustomUserService); 
 	}
 	
 //	@Override

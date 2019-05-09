@@ -20,11 +20,11 @@
 		<a class="navbar-brand col-auto mr-auto" href="#">智能物联网平台</a>
 		<ul class="navbar-nav px-3">
 			<li id="li-devgroup-info" class="nav-item dropdown text-nowrap"
-				th:attr="data-username=${username}, data-devgroup-name=${devGroupName}"><a
+				th:attr="data-username=${userid}, data-devgroup-name=${devGroupName}"><a
 				class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
 				role="button" data-toggle="dropdown" aria-haspopup="true"
 				aria-expanded="false"
-				th:text="|${username}-${devGroupPetName}|">
+				th:text="|${userid}-${devGroupPetName}|">
 					admin </a>
 				<div class="dropdown-menu dropdown-menu-right"
 					aria-labelledby="navbarDropdown">

@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bairock.iot.hamaServer.SpringUtil;
-import com.bairock.iot.hamaServer.repository.UserRepository;
+import com.bairock.iot.hamaServer.service.DevGroupService;
 import com.bairock.iot.hamaServer.service.DeviceService;
 import com.bairock.iot.intelDev.communication.DevChannelBridge;
 import com.bairock.iot.intelDev.device.CtrlModel;
@@ -25,7 +25,6 @@ import com.bairock.iot.intelDev.order.LoginModel;
 import com.bairock.iot.intelDev.order.OrderBase;
 import com.bairock.iot.intelDev.order.OrderType;
 import com.bairock.iot.intelDev.user.DevGroup;
-import com.bairock.iot.intelDev.user.User;
 import com.bairock.iot.intelDev.user.Util;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,7 +42,8 @@ public class PadChannelBridge {
 	public static ChannelGroup channelGroup = new DefaultChannelGroup("client", GlobalEventExecutor.INSTANCE);
 
 	private Channel channel;
-	private UserRepository userRepository = SpringUtil.getBean(UserRepository.class);
+//	private UserRepository userRepository = SpringUtil.getBean(UserRepository.class);
+	private DevGroupService devGroupService = SpringUtil.getBean(DevGroupService.class);
 	private DeviceService deviceService = SpringUtil.getBean(DeviceService.class);
 	private MyOnCurrentValueChangedListener myOnCurrentValueChangedListener;
 	private MyOnStateChangedListener myOnStateChangedListener;
@@ -330,8 +330,7 @@ public class PadChannelBridge {
 	private Device findDevByCoding(String coding) {
 		Device dev = findDevice(coding, listDevice);
 		if (null == dev) {
-			User user = userRepository.findByName(userName);
-			DevGroup group = user.findDevGroupByName(groupName);
+			DevGroup group = devGroupService.findByNameAndUserid(groupName, userName);
 			dev = findDevByCoding(coding, group);
 		}
 		return dev;
@@ -364,11 +363,7 @@ public class PadChannelBridge {
 	}
 
 	private void sendInitStateToPad() {
-		User user = userRepository.findByName(userName);
-		if (null == user) {
-			return;
-		}
-		DevGroup group = user.findDevGroupByName(groupName);
+		DevGroup group = devGroupService.findByNameAndUserid(groupName, userName);
 		if (null == group) {
 			return;
 		}

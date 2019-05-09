@@ -10,10 +10,10 @@ public interface GroupRepository extends JpaRepository<DevGroup, String> {
 
 	/**
 	 * 根据用户ID查询所有设备组
-	 * @param userId 用户ID
+	 * @param userId 用户账号
 	 * @return 设备组集合
 	 */
-    List<DevGroup> findByUserId(long userId);
+    List<DevGroup> findByUserid(String userid);
     
     /**
      * 根据组名,组密码和用户id查找设备组
@@ -22,7 +22,7 @@ public interface GroupRepository extends JpaRepository<DevGroup, String> {
      * @param userId 用户id
      * @return
      */
-    DevGroup findByNameAndPsdAndUserId(String name, String psd, long userId);
+    DevGroup findByNameAndPsdAndUserid(String name, String psd, long userid);
     
     /**
      * 根据组名和用户id查找组
@@ -30,5 +30,5 @@ public interface GroupRepository extends JpaRepository<DevGroup, String> {
      * @param userId
      * @return
      */
-    DevGroup findByNameAndUserId(String name, long userId);
+    DevGroup findByNameAndUserid(String name, String userid);
 }

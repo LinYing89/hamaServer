@@ -2,52 +2,38 @@ package com.bairock.iot.hamaServer.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import com.bairock.iot.hamaServer.data.RegisterUserHelper;
-import com.bairock.iot.hamaServer.service.UserService;
-import com.bairock.iot.intelDev.data.Result;
-import com.bairock.iot.intelDev.user.User;
+import com.bairock.iot.hamaServer.data.UserAuthority;
+import com.bairock.iot.hamaServer.repository.UserAuthorityRepo;
 
 @Controller
 @RequestMapping(value = "/user")
 public class UserController {
-	
-	@Autowired
-	private UserService userService;
 
+	@Autowired
+	private UserAuthorityRepo userAuthorityRepo;
+	
     //打开注册页面
     @GetMapping("/page/register")
     public String registerForm() {
         return "register";
     }
 
-    //提交注册信息
-    @PostMapping("/register")
-    public String registerSubmit(Model model, @ModelAttribute User user) {
-
-    	User userDb = userService.findByName(user.getName());
-    	if(null != userDb) {
-    		model.addAttribute("username", user.getName());
-    		model.addAttribute("error", "用户名已存在");
-    		return "register";
-    	}
-    	userService.addUser(user);
-        //重定向
-        return "redirect:/loginSucces";
-    }
-
     //打开登录页面
     @GetMapping("/login")
-    public String loginForm(Model model) {
-        model.addAttribute("registerUserHelper", new RegisterUserHelper());
+    public String loginForm() {
+        return "login";
+    }
+    
+    @GetMapping("/register/success")
+    public String registerSuccess(@RequestParam String userid) {
+    	UserAuthority ua = new UserAuthority();
+		ua.setUserid(userid);
+		ua.setAuthority("ROLE_USER");
+		userAuthorityRepo.saveAndFlush(ua);
         return "login";
     }
 
@@ -87,26 +73,4 @@ public class UserController {
 //        model.addAttribute("registerUserHelper", new RegisterUserHelper());
 //        return "login";
 //    }
-    
-    /**
-     * 用户数据上传
-     * @param user
-     * @return
-     */
-    @ResponseBody
-    @PostMapping("/userUpload")
-    public Result<Object> userUpload(@RequestBody User user) throws Exception{
-    	return userService.userUpload(user);
-    }
-    
-    /**
-     * 用户数据下载
-     * @param user
-     * @return
-     */
-    @ResponseBody
-    @GetMapping("/userDownload/{userName}")
-    public Result<User> userDownload(@PathVariable String userName) throws Exception{
-    	return userService.userDownload(userName);
-    }
 }

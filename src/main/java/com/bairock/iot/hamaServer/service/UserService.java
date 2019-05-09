@@ -1,18 +1,21 @@
 package com.bairock.iot.hamaServer.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import java.io.IOException;
 
-import com.bairock.iot.hamaServer.Util;
-import com.bairock.iot.hamaServer.data.UserAuthority;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
 import com.bairock.iot.hamaServer.exception.UserException;
-import com.bairock.iot.hamaServer.repository.UserAuthorityRepo;
 import com.bairock.iot.hamaServer.repository.UserRepository;
 import com.bairock.iot.hamaServer.utils.ResultUtil;
 import com.bairock.iot.intelDev.data.Result;
 import com.bairock.iot.intelDev.enums.ResultEnum;
 import com.bairock.iot.intelDev.user.DevGroup;
 import com.bairock.iot.intelDev.user.User;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class UserService {
@@ -22,8 +25,6 @@ public class UserService {
 	
 	@Autowired
 	private UserRepository userRepository;
-	@Autowired
-	private UserAuthorityRepo userAuthorityRepo;
 	
 	public User findById(long userId) {
 		User user = userRepository.findById(userId).orElse(null);
@@ -33,24 +34,24 @@ public class UserService {
 		return user;
 	}
 	
-//	@Cacheable(value = "user", key = "#userName")
-	public User findByName(String userName) {
-		User user = userRepository.findByName(userName);
-		return user;
-	}
-	
-//	@CachePut(value = "user", key="#result.name")
-	public User addUser(User user) {
-		UserAuthority ua = new UserAuthority();
-		ua.setUsername(user.getName());
-		ua.setAuthority("ROLE_USER");
-		userAuthorityRepo.saveAndFlush(ua);
-		
-		String psd = user.getPsd();
-		String encodePsd = Util.encodePassword(psd);
-		user.setPsd(encodePsd);
-		
-		return userRepository.saveAndFlush(user);
+	@Cacheable(value="user", key="#userid")
+	public User findByUserid(String userid) {
+		RestTemplate rest = new RestTemplate();
+//		String url = "http://localhost:8081/user/getUserInfo/" + userid;
+		String url = "http://051801.cn:8081/user/getUserInfo/" + userid;
+		String strRes = rest.getForObject(url, String.class);
+		ObjectMapper om = new ObjectMapper();
+		Result<User> result;
+		try {
+			result = om.readValue(strRes, new TypeReference<Result<User>>() {});
+			if(result.getCode() == 0) {
+				com.bairock.iot.intelDev.user.User myUser = result.getData();
+				return myUser;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	/**
@@ -65,7 +66,7 @@ public class UserService {
 		if(user.getListDevGroup().size() == 0) {
 			throw new UserException(ResultEnum.DEVGROUP_UPLOAD_NULL);
 		}
-		User userDb = userRepository.findByName(user.getName());
+		User userDb = userRepository.findByUserid(user.getUserid());
 		if(null == userDb) {
 			throw new UserException(ResultEnum.ERR_USERNAME);
 		}
@@ -89,7 +90,7 @@ public class UserService {
 	 * @throws Exception 下载异常信息
 	 */
 	public Result<User> userDownload(String name) throws Exception {
-		User user = userRepository.findByName(name);
+		User user = userRepository.findByUserid(name);
 		Result<User> r = new Result<>();
 		if(null == user) {
 			throw new UserException(ResultEnum.ERR_USERNAME);
