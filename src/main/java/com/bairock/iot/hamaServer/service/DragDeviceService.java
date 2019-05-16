@@ -13,14 +13,25 @@ public class DragDeviceService {
 
     @Autowired
     private DragDeviceRepository dragDeviceRepository;
-    
+
     public DragDevice findByDeviceId(String deviceId) {
         return dragDeviceRepository.findByDeviceId(deviceId);
     }
-    
+
     public void insert(List<DragDevice> dragDevices) {
-        for(DragDevice dd : dragDevices) {
-            dragDeviceRepository.saveAndFlush(dd);
+        for (DragDevice dd : dragDevices) {
+            DragDevice dragDevice = dragDeviceRepository.findByDeviceId(dd.getDeviceId());
+            if (null == dragDevice) {
+                dragDeviceRepository.saveAndFlush(dd);
+            } else {
+                dragDevice.setImageHeight(dd.getImageHeight());
+                dragDevice.setImageWidth(dd.getImageWidth());
+                dragDevice.setImageName(dd.getImageName());
+                dragDevice.setImageType(dd.getImageType());
+                dragDevice.setLayoutx(dd.getLayoutx());
+                dragDevice.setLayouty(dd.getLayouty());
+                dragDeviceRepository.saveAndFlush(dragDevice);
+            }
         }
     }
 }
