@@ -16,7 +16,7 @@ $('#editGroupModal').on('show.bs.modal', function(event) {
 	var title = modal.find('#editGroupModalTitle');
 	if (target.data('option') == 'add') {
 		title.text("添加设备组");
-		var userId = target.data('user-id')
+		var userId = target.data('userid')
 		modal.find('form').attr('action', '/group/add/' + userId)
 	} else {
 		title.text("编辑设备组");

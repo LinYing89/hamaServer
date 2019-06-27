@@ -59,6 +59,10 @@ public class DevGroupService {
 		return groupRepository.findByNameAndUserid(name, userid);
 	}
 	
+	public DevGroup findByNameAndPsdAndUserid(String name, String psd, Long userid) {
+        return groupRepository.findByNameAndPsdAndUserid(name, psd, userid);
+    }
+	
 //	@CachePut(value = "devGroup", key = "#result.id")
 	public DevGroup addGroup(String userid, DevGroup group) {
 		User user = userService.findByUserid(userid);

@@ -38,7 +38,7 @@ public class GroupController {
     private DragConfigService dragConfigService;
 
     // 打开注册页面
-    @PostMapping("/add/{userId}")
+    @PostMapping("/add/{userid}")
     public String addDevGroup(@PathVariable String userid, DevGroup group) {
         devGroupService.addGroup(userid, group);
         return "redirect:/loginSuccess";

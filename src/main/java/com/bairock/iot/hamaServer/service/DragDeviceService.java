@@ -26,6 +26,7 @@ public class DragDeviceService {
             } else {
                 dragDevice.setImageHeight(dd.getImageHeight());
                 dragDevice.setImageWidth(dd.getImageWidth());
+                dragDevice.setRotate(dd.getRotate());
                 dragDevice.setImageName(dd.getImageName());
                 dragDevice.setImageType(dd.getImageType());
                 dragDevice.setLayoutx(dd.getLayoutx());
