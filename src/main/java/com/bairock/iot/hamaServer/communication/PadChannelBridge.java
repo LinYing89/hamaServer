@@ -144,8 +144,9 @@ public class PadChannelBridge {
 						}
 					} else {
 						// 远程登录, 推送服务器设备状态到客户端
-						sendInitStateToPad();
+//						sendInitStateToPad();
 					}
+					sendInitStateToPad();
 				}
 				break;
 			case GEAR:

@@ -12,15 +12,12 @@ import com.bairock.iot.hamaServer.test.DeviceMsgTestService;
 import com.bairock.iot.intelDev.communication.DevChannelBridge;
 import com.bairock.iot.intelDev.communication.DevChannelBridgeHelper;
 import com.bairock.iot.intelDev.communication.MessageAnalysiser;
-import com.bairock.iot.intelDev.device.Coordinator;
 import com.bairock.iot.intelDev.device.CtrlModel;
 import com.bairock.iot.intelDev.device.DevHaveChild;
 import com.bairock.iot.intelDev.device.DevStateHelper;
 import com.bairock.iot.intelDev.device.Device;
-import com.bairock.iot.intelDev.device.DeviceAssistent;
 import com.bairock.iot.intelDev.device.OrderHelper;
 import com.bairock.iot.intelDev.device.devcollect.DevCollect;
-import com.bairock.iot.intelDev.device.devswitch.DevSwitchXRoad;
 import com.bairock.iot.intelDev.device.devswitch.SubDev;
 import com.bairock.iot.intelDev.user.DevGroup;
 import com.bairock.iot.intelDev.user.User;
@@ -145,10 +142,6 @@ public class MyDevChannelBridge extends DevChannelBridge {
     public void analysisSingleMsg(String msg) {
         if (!msg.contains("#")) {
             return;
-        }
-        // PLC上传
-        if (msg.startsWith("upload")) {
-
         }
         String[] codingState = MessageAnalysiser.findCodingState(msg);
 
@@ -329,64 +322,4 @@ public class MyDevChannelBridge extends DevChannelBridge {
         }
         return null;
     }
-
-    private void uploadPLC(String msg) {
-        String[] codings = msg.split(":");
-        String username = codings[1];
-
-        User user = userService.findByUserid(username);
-        if (null == user) {
-            sendUploadResult(1, "no user");
-            return;
-        }
-
-        String groupname = codings[2];
-        String groupPsd = codings[3];
-        DevGroup group = devGroupService.findByNameAndPsdAndUserid(groupname, groupPsd, user.getId());
-        if (null == group) {
-            sendUploadResult(1, "no device group");
-            return;
-        }
-
-        String plcCoding = codings[4];
-        Device device = group.findDeviceWithCoding(plcCoding);
-        if (null != device) {
-            // 没有则创建
-            Coordinator coordinator = (Coordinator) DeviceAssistent.createDeviceByCoding(plcCoding);
-            group.addDevice(coordinator);
-            for (int i = 5; i < codings.length; i++) {
-                String subCoding = codings[i];
-                if (subCoding.contains(",")) {
-                    // 是多路开关
-                    String[] switchCoding = subCoding.split(",");
-                    DevSwitchXRoad devSwitch = (DevSwitchXRoad) DeviceAssistent.createDeviceByCoding(switchCoding[0]);
-                    devSwitch.rebuildSubDev(Integer.parseInt(switchCoding[1]));
-                    coordinator.addChildDev(devSwitch);
-                } else {
-                    Device dev = DeviceAssistent.createDeviceByCoding(subCoding);
-                    coordinator.addChildDev(dev);
-                }
-            }
-        } else {
-            Coordinator coordinator = (Coordinator) device;
-            for (int i = 5; i < codings.length; i++) {
-                String subCoding = codings[i];
-                Device dev = coordinator.findDevByCoding(subCoding);
-                if(null == dev) {
-                    
-                }
-            }
-        }
-
-    }
-
-    private void sendUploadResult(int code, String message) {
-        StringBuilder sb = new StringBuilder("$upload:");
-        sb.append(Integer.toString(code));
-        sb.append(":");
-        sb.append(message);
-        sb.append("#00");
-        sendOrder(sb.toString());
-    }
-
 }

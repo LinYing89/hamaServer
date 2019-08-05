@@ -27,6 +27,10 @@ $(document).ready(function() {
 		}
 	});
 	
+	// 刷新按钮
+	$('#btn-refresh').click(function() {
+		refreshClick();
+	});
 	
 	// 开按钮
 	$('.btn-on-dev').click(function() {
@@ -43,6 +47,17 @@ $(document).ready(function() {
 		ctrlClick($(this).data("dev-id"), $(this).data("long-coding"), 0);
 	});
 });
+
+function refreshClick() {
+	var orderTypeCtrl;
+	var dataCtrl;
+	var dataGear;
+	stompClient.send("/app/refresh", {}, JSON.stringify({
+		'orderType' : 'REFRESH_STATE',
+		'username' : userName,
+		'devGroupName' : devGroupName
+	}));
+}
 
 function ctrlClick(devId, longCoding, action) {
 	var orderTypeCtrl;

@@ -23,30 +23,37 @@
 				th:attr="data-username=${userid}, data-devgroup-name=${devGroupName}"><a
 				class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
 				role="button" data-toggle="dropdown" aria-haspopup="true"
-				aria-expanded="false"
-				th:text="|${userid}-${devGroupPetName}|">
+				aria-expanded="false" th:text="|${userid}-${devGroupPetName}|">
 					admin </a>
 				<div class="dropdown-menu dropdown-menu-right"
 					aria-labelledby="navbarDropdown">
-					<a sec:authorize="hasRole('ROLE_USER')" class="dropdown-item" href="#">个人资料</a>
+					<a sec:authorize="hasRole('ROLE_USER')" class="dropdown-item"
+						href="#">个人资料</a>
 					<form action="#" th:action="@{/logout}" method="post">
 						<button type="submit" class="dropdown-item btn btn-link">退出</button>
 					</form>
 				</div></li>
 		</ul>
 	</nav>
-	
+
 	<div class="container mt-5" role="main">
-		<nav>
-			<div class="nav nav-tabs" id="nav-tab" role="tablist">
-				<a class="nav-item nav-link active" id="nav-ele-tab"
-					data-toggle="tab" href="#nav-ele" role="tab"
-					aria-controls="nav-ele" aria-selected="true">电器</a> <a
-					class="nav-item nav-link" id="nav-climate-tab" data-toggle="tab"
-					href="#nav-climate" role="tab" aria-controls="nav-climate"
-					aria-selected="false">仪表</a>
+		<div class="row">
+			<div class="col-auto mr-auto">
+				<nav>
+					<div class="nav nav-tabs" id="nav-tab" role="tablist">
+						<a class="nav-item nav-link active" id="nav-ele-tab"
+							data-toggle="tab" href="#nav-ele" role="tab"
+							aria-controls="nav-ele" aria-selected="true">电器</a> <a
+							class="nav-item nav-link" id="nav-climate-tab" data-toggle="tab"
+							href="#nav-climate" role="tab" aria-controls="nav-climate"
+							aria-selected="false">仪表</a>
+					</div>
+				</nav>
 			</div>
-		</nav>
+			<div class="col-auto">
+				<button id="btn-refresh" type="button" class="btn btn-primary">刷新状态</button>
+			</div>
+		</div>
 
 		<div class="tab-content" id="nav-tabContent">
 			<div class="tab-pane fade show active" id="nav-ele" role="tabpanel"
@@ -84,8 +91,8 @@
 										type="button">关</button>
 								</div>
 							</td>
-							<td>
-								<span th:id="|span-ctrl-model-${dev.longCoding}|" th:text="${dev.ctrlModel.toString() eq 'LOCAL'} ? '本地' : '远程'"></span>
+							<td><span th:id="|span-ctrl-model-${dev.longCoding}|"
+								th:text="${dev.ctrlModel.toString() eq 'LOCAL'} ? '本地' : '远程'"></span>
 							</td>
 							<td><a class="link dev" href="#"
 								th:data-long-coding="${dev.longCoding}"> <span
@@ -109,7 +116,8 @@
 						<tr th:each="dev : ${listDevValue}" th:id="|tr-${dev.longCoding}|"
 							th:data-state="${dev.devStateId}">
 							<td th:text="${dev.name}">设备名</td>
-							<td><span th:id="|span-value-${dev.longCoding}|" th:text="${dev.collectProperty.currentValue}"></span> <span
+							<td><span th:id="|span-value-${dev.longCoding}|"
+								th:text="${dev.collectProperty.currentValue}"></span> <span
 								th:text="${dev.collectProperty.unitSymbol}">单位符号</span></td>
 							<td><a class="link dev" href="#" title="${dev.longCoding}">
 									<span data-feather="bar-chart"></span>

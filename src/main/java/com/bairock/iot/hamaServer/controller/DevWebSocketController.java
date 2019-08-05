@@ -38,6 +38,15 @@ public class DevWebSocketController {
 	}
 
 	/**
+	 * 向本地客户端发送刷新命令
+	 * @param order
+	 */
+	@MessageMapping("/refresh")
+    public void refresh(DeviceOrder order) {
+	    sendCtrlOrderToPad(order);
+    }
+	
+	/**
 	 * 网页发出的控制命令 控制命令相当于档位切换命令, 不需要单独发送档位命令
 	 * 
 	 * @param ctrlDev
