@@ -11,6 +11,7 @@ import com.bairock.iot.hamaServer.test.DeviceMsg;
 import com.bairock.iot.hamaServer.test.DeviceMsgTestService;
 import com.bairock.iot.intelDev.communication.DevChannelBridge;
 import com.bairock.iot.intelDev.communication.DevChannelBridgeHelper;
+import com.bairock.iot.intelDev.communication.DeviceChannelBridge;
 import com.bairock.iot.intelDev.communication.MessageAnalysiser;
 import com.bairock.iot.intelDev.device.CtrlModel;
 import com.bairock.iot.intelDev.device.DevHaveChild;
@@ -22,7 +23,7 @@ import com.bairock.iot.intelDev.device.devswitch.SubDev;
 import com.bairock.iot.intelDev.user.DevGroup;
 import com.bairock.iot.intelDev.user.User;
 
-public class MyDevChannelBridge extends DevChannelBridge {
+public class MyDevChannelBridge extends DeviceChannelBridge {
 
     private UserService userService;
     private DevGroupService devGroupService;
@@ -30,6 +31,8 @@ public class MyDevChannelBridge extends DevChannelBridge {
 
     private String userName = "";
     private String groupName = "";
+    
+    private int unknowMsg = 0;
 
     // 缓存收到的数据
     StringBuilder sb = new StringBuilder();
@@ -102,8 +105,15 @@ public class MyDevChannelBridge extends DevChannelBridge {
         }
         sb.append(msg);
         if (judgeMsgFormate(sb.toString())) {
+            unknowMsg = 0;
             analysisReceiveMessage(msg);
             sb.setLength(0);
+        }else {
+            if(sb.length() > 500) {
+                close();
+            }else {
+                unknowMsg();
+            }
         }
     }
 
@@ -113,6 +123,21 @@ public class MyDevChannelBridge extends DevChannelBridge {
         if (null != getDevice()) {
 //			removeDeviceListener(getDevice());
         }
+    }
+    
+    private void unknowMsg() {
+        unknowMsg++;
+        if(unknowMsg > 10) {
+            this.close();
+        }
+    }
+    
+    private void unknowUserInfo() {
+        unknowMsg++;
+        if(unknowMsg > 10) {
+            this.close();
+        }
+        sendH2();
     }
 
     public boolean judgeMsgFormate(String msg) {
@@ -165,16 +190,19 @@ public class MyDevChannelBridge extends DevChannelBridge {
                 User user = userService.findByUserid(userid);
                 if (null == user) {
                     logger.error("no username : " + userid);
+                    unknowUserInfo();
                     return;
                 }
 //				DevGroup group = user.findDevGroupByName(groupName);
                 DevGroup group = devGroupService.findByNameAndUserid(groupName, userid);
                 if (null == group) {
                     logger.error("no groupname : " + groupName);
+                    unknowUserInfo();
                     return;
                 }
                 Device dev = group.findDeviceWithCoding(coding);
                 if (null == dev) {
+                    unknowUserInfo();
                     return;
                 }
                 if (dev.getParent() != null) {
@@ -202,6 +230,8 @@ public class MyDevChannelBridge extends DevChannelBridge {
                 if (null != state) {
                     handleState(dev, state);
                 }
+            }else {
+                unknowUserInfo();
             }
 
         } else {

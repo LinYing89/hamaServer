@@ -110,6 +110,7 @@
 						<tr>
 							<th scope="col">名称</th>
 							<th scope="col">值</th>
+							<th scope="col">单位</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -117,8 +118,8 @@
 							th:data-state="${dev.devStateId}">
 							<td th:text="${dev.name}">设备名</td>
 							<td><span th:id="|span-value-${dev.longCoding}|"
-								th:text="${dev.collectProperty.currentValue}"></span> <span
-								th:text="${dev.collectProperty.unitSymbol}">单位符号</span></td>
+								th:text="${dev.collectProperty.createFormatValue()}"></span></td>
+							<td><span th:text="${dev.collectProperty.unitSymbol}">单位符号</span></td>
 							<td><a class="link dev" href="#" title="${dev.longCoding}">
 									<span data-feather="bar-chart"></span>
 							</a></td>

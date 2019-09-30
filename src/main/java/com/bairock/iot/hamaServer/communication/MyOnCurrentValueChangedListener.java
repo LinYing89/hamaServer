@@ -25,7 +25,7 @@ public class MyOnCurrentValueChangedListener implements OnCurrentValueChangedLis
 		Device superParent = dev.findSuperParent();
 		if (dev instanceof DevCollect) {
 			// 通知网页
-			WebDevValue webDevValue = new WebDevValue(dev.getLongCoding(), dev.getCollectProperty().getCurrentValue());
+			WebDevValue webDevValue = new WebDevValue(dev.getLongCoding(), dev.getCollectProperty().createFormatValue());
 			deviceService.broadcastValueChanged(superParent.getUsername(), superParent.getDevGroupName(), webDevValue);
 
 			// 远程设备才发往本地, 本地设备状态在服务器收到之前已经到位了

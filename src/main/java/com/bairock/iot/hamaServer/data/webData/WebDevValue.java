@@ -7,7 +7,7 @@ package com.bairock.iot.hamaServer.data.webData;
  */
 public class WebDevValue extends WebDevBeanBase {
 
-	private float value;
+	private String value;
 	
 	public WebDevValue() {
 	}
@@ -16,16 +16,16 @@ public class WebDevValue extends WebDevBeanBase {
 		super(longCoding);
 	}
 	
-	public WebDevValue(String longCoding, float value) {
+	public WebDevValue(String longCoding, String value) {
 		super(longCoding);
 		this.value = value;
 	}
 
-	public float getValue() {
+	public String getValue() {
 		return value;
 	}
 
-	public void setValue(float value) {
+	public void setValue(String value) {
 		this.value = value;
 	}
 

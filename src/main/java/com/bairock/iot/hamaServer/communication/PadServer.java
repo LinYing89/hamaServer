@@ -16,6 +16,7 @@ import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.Delimiters;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.timeout.IdleStateHandler;
 
 public class PadServer {
 	public static int PORT = 4045;
@@ -39,7 +40,8 @@ public class PadServer {
 							ph.addLast("framer", new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));        
 							// 解码和编码，应和客户端一致       
 							ph.addLast("decoder", new StringDecoder(Charset.forName("UTF-8")));        
-							ph.addLast("encoder", new StringEncoder(Charset.forName("UTF-8")));        
+							ph.addLast("encoder", new StringEncoder(Charset.forName("UTF-8")));   
+							ph.addLast(new IdleStateHandler(90, -1, -1));
 							ph.addLast(new PadHandler());
 						}
 					}).option(ChannelOption.SO_BACKLOG, 128) // (5)

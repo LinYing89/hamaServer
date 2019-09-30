@@ -60,7 +60,7 @@ public class PadChannelBridge {
 	private String channelId;
 	public String loginModel = null;
 	// the channel have no response count,0 if have response
-	private int noReponse;
+//	private int noReponse;
 
 	private OnPadConnectedListener onPadConnectedListener;
 	private OnPadMsgListener onPadMsgListener;
@@ -116,13 +116,19 @@ public class PadChannelBridge {
 		onPadMsgListener.onReceived(userName, groupName, msg);
 
 		logger.info("channelReceived userName:" + userName + " groupName:" + groupName + " msg:" + msg);
-		noReponse = 0;
+//		noReponse = 0;
 
 		try {
 			ObjectMapper om = new ObjectMapper();
 			DeviceOrder orderBase = om.readValue(msg, DeviceOrder.class);
-			if(orderBase.getOrderType() != OrderType.HEAD_USER_INFO && null == loginModel) {
-				return;
+			if(orderBase.getOrderType() != OrderType.HEAD_USER_INFO) {
+			    if(null == loginModel) {
+			        return;
+			    }
+			    if (userName == null || groupName == null || userName.isEmpty() || groupName.isEmpty()) {
+			        sendUserInfoHeart();
+			        return;
+			    }
 			}
 			
 //			OrderBase ob = new OrderBase();
@@ -277,6 +283,19 @@ public class PadChannelBridge {
 		return formatOk;
 	}
 
+	public void sendUserInfoHeart() {
+        ObjectMapper om = new ObjectMapper();
+        OrderBase ob = new OrderBase();
+        ob.setOrderType(OrderType.HEAD_USER_INFO);
+        try {
+            String heart = om.writeValueAsString(ob);
+            sendMessage(heart);
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+	}
+	
 	public String getHeart() {
 		String heart = "";
 		ObjectMapper om = new ObjectMapper();
@@ -465,21 +484,29 @@ public class PadChannelBridge {
 	}
 
 	public void sendMessage(String msg) {
-		logger.info(" sendMessage userName:" + userName + " groupName:" + groupName + " msg:" + msg);
-		if (null == getChannel()) {
-			return;
-		}
-		if (noReponse > 6) {
-			channel.close();
-			PadChannelBridgeHelper.getIns().removeBridge(this);
-		} else {
-			noReponse++;
-			if (null != getChannel()) {
-				send(msg);
-//				getChannel().writeAndFlush(Unpooled.copiedBuffer(msg.getBytes()));
-			}
-		}
-	}
+        logger.info(" sendMessage userName:" + userName + " groupName:" + groupName + " msg:" + msg);
+        if (null == getChannel()) {
+            return;
+        }
+        send(msg);
+    }
+	
+//	public void sendMessage(String msg) {
+//		logger.info(" sendMessage userName:" + userName + " groupName:" + groupName + " msg:" + msg);
+//		if (null == getChannel()) {
+//			return;
+//		}
+//		if (noReponse > 6) {
+//			channel.close();
+//			PadChannelBridgeHelper.getIns().removeBridge(this);
+//		} else {
+//			noReponse++;
+//			if (null != getChannel()) {
+//				send(msg);
+////				getChannel().writeAndFlush(Unpooled.copiedBuffer(msg.getBytes()));
+//			}
+//		}
+//	}
 
 	public void sendMessageNotReponse(String msg) {
 		logger.info("send userName:" + userName + " groupName:" + groupName + " msg:" + msg);

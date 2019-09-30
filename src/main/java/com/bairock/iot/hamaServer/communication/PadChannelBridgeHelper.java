@@ -138,7 +138,7 @@ public class PadChannelBridgeHelper {
 		PadChannelBridge db = new PadChannelBridge();
 		db.setChannelId(channelId);
 		db.setOnPadConnectedListener(new MyOnPadConnectedListener());
-		db.sendHeart();
+		db.sendUserInfoHeart();
 		listPadChannelBridge.add(db);
 	}
 
