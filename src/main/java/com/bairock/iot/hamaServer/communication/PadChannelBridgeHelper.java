@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import com.bairock.iot.intelDev.order.LoginModel;
-import com.bairock.iot.intelDev.user.IntelDevHelper;
 
 public class PadChannelBridgeHelper {
 
@@ -20,7 +19,7 @@ public class PadChannelBridgeHelper {
 	}
 
 	private PadChannelBridgeHelper() {
-		IntelDevHelper.executeThread(new PadHeartThread());
+		//IntelDevHelper.executeThread(new PadHeartThread());
 	}
 
 	public List<PadChannelBridge> getListPadChannelBridge(String userName, String groupName) {

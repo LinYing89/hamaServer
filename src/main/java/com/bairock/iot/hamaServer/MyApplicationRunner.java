@@ -48,7 +48,7 @@ public class MyApplicationRunner implements ApplicationRunner {
         logger.info("TcpServerServicer end");
         
 //        DevChannelBridgeHelper.getIns().stopSeekDeviceOnLineThread();
-        DevChannelBridgeHelper.getIns().startSeekDeviceOnLineThread();
+//        DevChannelBridgeHelper.getIns().startSeekDeviceOnLineThread();
 	}
 
 }

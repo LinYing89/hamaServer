@@ -59,9 +59,18 @@ public class DevWebSocketController {
 			return;
 		}
 		if(order.getOrderType() == OrderType.GEAR) {
-			sendLocalOrder(order);
+		    sendCtrlOrderToPad(order);
 			return;
 		}
+		
+		IStateDev subDev = (IStateDev)dev;
+        String strOrder;
+        if(order.getData().equals(DevStateHelper.DS_KAI)) {
+            strOrder = subDev.getTurnOnOrder();
+        }else {
+            strOrder = subDev.getTurnOffOrder();
+        }
+        order.setData(strOrder);
 		if (dev.getCtrlModel() == CtrlModel.LOCAL) {
 			sendLocalOrder(order);
 		} else if (dev.getCtrlModel() == CtrlModel.REMOTE) {
@@ -73,10 +82,7 @@ public class DevWebSocketController {
 	}
 	
 	private void sendLocalOrder(DeviceOrder order) {
-//		if(order.getOrderType() == OrderType.CTRL_DEV) {
-			sendCtrlOrderToPad(order);
-//		}
-//		sendGearToPad(order);
+		sendCtrlOrderToPad(order);
 	}
 	
 	private void sendRemoteOrder(Device dev, DeviceOrder order) {
@@ -87,14 +93,7 @@ public class DevWebSocketController {
 		if(null == db) {
 			return;
 		}
-		IStateDev subDev = (IStateDev)dev;
-		String strOrder;
-		if(order.getData().equals(DevStateHelper.DS_KAI)) {
-			strOrder = subDev.getTurnOnOrder();
-		}else {
-			strOrder = subDev.getTurnOffOrder();
-		}
-		db.sendOrder(strOrder);
+		db.sendOrder(order.getData());
 	}
 
 	private void sendCtrlOrderToPad(DeviceOrder order) {
